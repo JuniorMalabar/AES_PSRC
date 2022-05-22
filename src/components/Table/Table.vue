@@ -1,6 +1,6 @@
 <template>
     <table :id="'table-' + tableId">
-        <caption :id="'table-caption' + tableId">Таблица замен стандарта AES</caption>
+        <caption :id="'table-caption' + tableId"></caption>
         <thead>
             <Square :border="false"></Square>
             <th :colindex="h" v-for="h  in header" :key="h">
@@ -55,17 +55,29 @@ export default {
     },
 
     mounted() {
+        let tableCaption = document.getElementById("table-caption" + this.tableId);
         if(this.modulo){
-            document.getElementById("table-caption" + this.tableId).innerHTML= this.display.asPolynom(this.modulo)
+            tableCaption.innerHTML= this.display.asPolynom(this.modulo)
+        } else if (this.type == "standart") {
+            tableCaption.innerHTML = "Таблица замен стандарта AES";
         } 
     }
 
 }
 </script>
 
-<style>
-table {
-    width: fit-content;
-}
+<style lang="scss" scoped>
+    table {
+        width: fit-content;
+        
+        th {
+            background: rgba(22, 62, 115, 1);
+            color: white;
+        }
 
+        .cell.no-border {
+            background: rgba(22, 62, 115, 1);
+            
+        }
+    }
 </style>
