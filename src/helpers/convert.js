@@ -1,14 +1,14 @@
 class Convert {
-    
-    toHex (num) {
+
+    toHex(num) {
         num = num.toString(16)
-        if(num.length < 2) {
+        if (num.length < 2) {
             num = '0' + num
         }
-        return num;
+        return num.toUpperCase();
     }
 
-    toBin (num) {
+    toBin(num) {
         num = num.toString(2)
         while (num.length < 8) {
             num = '0' + num

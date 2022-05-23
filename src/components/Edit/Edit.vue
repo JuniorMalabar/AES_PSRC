@@ -3,7 +3,7 @@
     <p v-if="message" class="message">
       {{message}}
     </p>
-    <div class="edit-wrapper">
+    <div @keyup.enter="toTop()" class="edit-wrapper">
       <input v-model="inputByte" type="text">
       <Button
         :disabled="error"
@@ -28,7 +28,11 @@
       message: {
         type: String,
         default: null
-      }
+      },
+      errorOnTop: {
+        type: Boolean,
+        default: false
+      },
     },
     data() {
       return {
@@ -49,6 +53,9 @@
       },
       error(val) {
         this.$emit("input-error", val)
+      },
+      errorOnTop(val) {
+        this.error = val
       }
     },
     mounted() {
@@ -77,6 +84,11 @@
     padding: 10px;
   }
   .wrapper {
-    margin-bottom: 20px;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
   }
 </style>

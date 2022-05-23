@@ -1,45 +1,72 @@
 <template>
   <div class="main-wrap">
-  <Edit 
-    @select-element="selectElement"
-    @input-error="inputError"
-    :message="'Введите значение входного байта'"
-  />
-  <p v-if="inputByte && !error">
-    Входной байт: {{ convert.toHex(inputByte) }} 
-    <br>
-    В двоичной форме: {{ binaryInputByte }}
-  </p>
-  <Table
-    :type="tableTypes[0]"
-    :bytes="standartTable"
-    :tableId="1"
-  />
-  <button style="margin: 20px" @click="show = !show">
-    <img height="100px" src="../assets/double-arrows-down.png" alt="">
-  </button>
+    <Edit 
+      @select-element="selectElement"
+      @input-error="inputError"
+      :message="'Введите значение входного байта'"
+      :errorOnTop="error"
+    />
   
-  <div class="info-tables-wrapper">
+    <div class="initial-data" v-if="inputByte && !error">
+      <div @click="reset" class="reset">×</div>
+      <p>
+        Входной байт: {{ convert.toHex(inputByte) }}
+      </p>
+      <p>
+        В двоичной форме: {{ binaryInputByte }}
+      </p>
+      <p>
+        В полиномиальной форме: <span ref="input-polynom"/> 
+      </p>
+      <p>
+        Левая часть входного байта 
+        ({{ display.addHexPrefix(leftPartOfInputByte) }}) 
+        определяет номер
+      </p>
+      <p>
+        Правая часть входного байта 
+        ({{ display.addHexPrefix(rightPartOfInputByte) }})
+        определяет номер
+      </p>
+    </div>
     <Table
-      style="transition: 0.5s"
-      :style="show?'opacity:1':'opacity:0'"
       :type="tableTypes[0]"
       :bytes="standartTable"
-      :tableId="2"
-      :modulo="'x2+1'"
+      :tableId="'S'"
     />
+    <!-- <button style="margin: 20px" @click="show = !show">
+      <img height="100px" src="../assets/double-arrows-down.png" alt="">
+    </button> -->
+    
+    <div class="info-tables-wrapper">
+      <Table
+        :type="tableTypes[1]"
+        :bytes="standartTable"
+        :tableId="'S1'"
+        :modulo="'x4+x+1'"
+      />
 
-    <Table
-      style="transition: 0.5s"
-      :style="show?'opacity:1':'opacity:0'"
-      :type="tableTypes[0]"
-      :bytes="standartTable"
-      :tableId="3"
-      :modulo="'x2+1'"
-    />
-  </div>
-  
+      <Table
+        :type="tableTypes[1]"
+        :bytes="standartTable"
+        :tableId="'S2'"
+        :modulo="'x4+x3+1'"
+      />
+    </div>
+    
+    <div class="control-tables-wrapper">
+      <Table
+        :type="tableTypes[2]"
+        :bytes="standartTable"
+        :tableId="'S1*'"
+      />
 
+      <Table
+        :type="tableTypes[2]"
+        :bytes="standartTable"
+        :tableId="'S2*'"
+      />
+    </div>
   </div>
 </template>
 
@@ -61,7 +88,6 @@ export default {
     return {
       standartTable: null,
       tableTypes: ["standart", "information", "control"],
-      show: false,
       inputByte: null,
       convert: null,
       display: null,
@@ -73,11 +99,28 @@ export default {
     this.standartTable = new Standart().STANDART_TABLE();
     this.convert = new Convert(),
     this.display = new Display()
+
   },
 
   methods: {
     selectElement(input) {
-      this.inputByte =  Number(this.display.addHexPrefix(input))
+      let check = Number(this.display.addHexPrefix(input))
+      if (isNaN(check)) {
+        this.error = true
+      } else if (check == 0){
+        this.inputByte = "0"  
+      } else {
+        this.inputByte =  check;
+      }
+      
+      if (this.inputByte) {
+        this.$nextTick(()=> {
+          this.$refs["input-polynom"].innerHTML = this.polynomInputByte;
+        })
+      } 
+    },
+    reset() {
+      this.inputByte = null
     },
     inputError(inputError){
       this.error = inputError
@@ -87,6 +130,18 @@ export default {
   computed: {
     binaryInputByte() {
       return this.convert.toBin(this.inputByte);
+    },
+
+    polynomInputByte() {
+      return this.display.binaryAsPolynom(this.binaryInputByte)
+    },
+
+    leftPartOfInputByte() {
+      return this.convert.toHex(this.inputByte).slice(0,1);
+    },
+    
+    rightPartOfInputByte() {
+      return this.convert.toHex(this.inputByte).slice(1,2);
     }
   }
 }
@@ -99,11 +154,41 @@ export default {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background: gainsboro;
+
+    & * {
+      font-size: 18px;
+    }
+  }
+  .reset {
+    text-align: end;
+    font-size: 24px;
+    font-weight: bold;
+    position: absolute;
+    right: 15px;
+    top: 8px;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 
-  .info-tables-wrapper {
+  .info-tables-wrapper,
+  .control-tables-wrapper {
     display: flex;
     width: 100%;
     justify-content: space-around;
+    margin-top: 20px;
+  }
+
+  .initial-data {
+      border: 1px solid;
+      margin-bottom: 20px;
+      padding: 15px;
+      position: relative;
+    p {
+      text-align: center;
+      margin: 5px 0;
+    }
   }
 </style>

@@ -39,6 +39,8 @@ export default {
   padding: 10px;
   width: 20px;
   height: 20px;
+  background: white;
+  font-size: 16px;
 
   &:hover {
     cursor: pointer

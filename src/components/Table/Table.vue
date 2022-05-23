@@ -1,6 +1,6 @@
 <template>
     <table :id="'table-' + tableId">
-        <caption :id="'table-caption' + tableId"></caption>
+        <caption :ref="'table-caption' + tableId"></caption>
         <thead>
             <Square :border="false"></Square>
             <th :colindex="h" v-for="h  in header" :key="h">
@@ -42,7 +42,7 @@ export default {
             require: false
         },
         tableId: {
-            type: Number
+            type: String
         }
     },
 
@@ -55,21 +55,29 @@ export default {
     },
 
     mounted() {
-        let tableCaption = document.getElementById("table-caption" + this.tableId);
+        let tableCaption = this.$refs["table-caption" + this.tableId];
         if(this.modulo){
             tableCaption.innerHTML= this.display.asPolynom(this.modulo)
         } else if (this.type == "standart") {
             tableCaption.innerHTML = "Таблица замен стандарта AES";
+        } else if (this.type == "control") {
+            tableCaption.innerHTML = "Контрольная таблица";
         } 
     }
-
 }
 </script>
 
 <style lang="scss" scoped>
     table {
         width: fit-content;
+        margin-bottom: 10px;
         
+        caption {
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
         th {
             background: rgba(22, 62, 115, 1);
             color: white;
