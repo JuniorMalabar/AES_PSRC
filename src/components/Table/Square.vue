@@ -1,5 +1,6 @@
 <template>
-  <td class="cell" :class="!border?'no-border':''">
+  <td class="cell" :class="subByte?'wow':''"
+  >
     {{ num }}
   </td>
 </template>
@@ -12,6 +13,10 @@ export default {
     num: String,
     rowIndex: Number,
     colIndex: Number,
+    subByte:{
+      type: Boolean,
+      default: false
+    },
     border: {
       type: Boolean,
       default: true
@@ -23,8 +28,6 @@ export default {
     }
   },
 
-  methods: {
-  }
 }
 </script>
 
@@ -35,19 +38,20 @@ export default {
   display: flex;
   justify-content: center;
   align-self: start;
-  border: 1px solid;
+  border: 1px solid black;
   padding: 10px;
   width: 20px;
   height: 20px;
   background: white;
   font-size: 16px;
-
   &:hover {
     cursor: pointer
   }
 
-  &.no-border {
-    border: 1px solid transparent;
+  &.wow{
+    background: rgba(#008000,0.2);
+    color: black;
+    border-color: #008000;
   }
 }
 

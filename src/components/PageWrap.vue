@@ -21,25 +21,29 @@
       <p>
         Левая часть входного байта 
         ({{ display.addHexPrefix(leftPartOfInputByte) }}) 
-        определяет номер
+        определяет номер строки
       </p>
       <p>
         Правая часть входного байта 
         ({{ display.addHexPrefix(rightPartOfInputByte) }})
-        определяет номер
+        определяет номер столбца
       </p>
     </div>
     <Table
+      v-if="inputByte"
       :type="tableTypes[0]"
       :bytes="standartTable"
       :tableId="'S'"
+      :selectedElementRowIndex="convert.fromHexToDec(leftPartOfInputByte)"
+      :selectedElementColIndex="convert.fromHexToDec(rightPartOfInputByte)"
     />
     <!-- <button style="margin: 20px" @click="show = !show">
       <img height="100px" src="../assets/double-arrows-down.png" alt="">
     </button> -->
     
-    <div class="info-tables-wrapper">
+    <div class="info-tables-wrapper" style="display: none">
       <Table
+        
         :type="tableTypes[1]"
         :bytes="standartTable"
         :tableId="'S1'"
@@ -54,7 +58,7 @@
       />
     </div>
     
-    <div class="control-tables-wrapper">
+    <div class="control-tables-wrapper" style="display: none">
       <Table
         :type="tableTypes[2]"
         :bytes="standartTable"
@@ -76,6 +80,7 @@ import Table from './Table/Table.vue';
 import Edit from './Edit/Edit.vue';
 import Convert from '../helpers/convert';
 import Display from '../helpers/display';
+import Calculation from '../helpers/calculation';
 
 export default {
 
@@ -91,15 +96,18 @@ export default {
       inputByte: null,
       convert: null,
       display: null,
+      calculation: null,
       error: false
     }
   },
 
   mounted() {
+    
     this.standartTable = new Standart().STANDART_TABLE();
     this.convert = new Convert(),
-    this.display = new Display()
-
+    this.display = new Display(),
+    this.calculation = new Calculation()
+    
   },
 
   methods: {
@@ -133,7 +141,7 @@ export default {
     },
 
     polynomInputByte() {
-      return this.display.binaryAsPolynom(this.binaryInputByte)
+      return this.display.indexesToTop(this.convert.binaryToPolynom(this.binaryInputByte));
     },
 
     leftPartOfInputByte() {
@@ -155,6 +163,7 @@ export default {
     align-items: center;
     flex-direction: column;
     background: gainsboro;
+    min-height: 98vh;
 
     & * {
       font-size: 18px;

@@ -2,7 +2,7 @@
     <table :id="'table-' + tableId">
         <caption :ref="'table-caption' + tableId"></caption>
         <thead>
-            <Square :border="false"></Square>
+            <Square :num="'S'"/>
             <th :colindex="h" v-for="h  in header" :key="h">
                 {{h}}
             </th>
@@ -11,7 +11,8 @@
             <tr v-for="(line,rowIndex) in bytes" :key="rowIndex">
                 <th :colIndex="header[rowIndex]">{{header[rowIndex]}}</th>
                 <td v-for="(byte,colIndex) in line" :key="colIndex">
-                    <Square :rowIndex="rowIndex" :colIndex="colIndex" :num="display.addHexPrefix(convert.toHex(byte))"/>
+                    <Square :rowIndex="rowIndex" :colIndex="colIndex" 
+                    :subByte="rowIndex == selectedElementRowIndex && colIndex == selectedElementColIndex" :num="display.addHexPrefix(convert.toHex(byte))"/>
                 </td>
             </tr>
         </tbody>
@@ -43,7 +44,13 @@ export default {
         },
         tableId: {
             type: String
-        }
+        },
+        selectedElementRowIndex: {
+            type: Number
+        },
+        selectedElementColIndex: {
+            type: Number
+        },
     },
 
     data() {
@@ -57,7 +64,7 @@ export default {
     mounted() {
         let tableCaption = this.$refs["table-caption" + this.tableId];
         if(this.modulo){
-            tableCaption.innerHTML= this.display.asPolynom(this.modulo)
+            tableCaption.innerHTML= this.display.indexesToTop(this.modulo)
         } else if (this.type == "standart") {
             tableCaption.innerHTML = "Таблица замен стандарта AES";
         } else if (this.type == "control") {
@@ -81,11 +88,6 @@ export default {
         th {
             background: rgba(22, 62, 115, 1);
             color: white;
-        }
-
-        .cell.no-border {
-            background: rgba(22, 62, 115, 1);
-            
         }
     }
 </style>
