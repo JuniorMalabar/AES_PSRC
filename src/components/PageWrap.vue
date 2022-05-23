@@ -114,7 +114,8 @@ export default {
     selectElement(input) {
       let check = Number(this.display.addHexPrefix(input))
       if (isNaN(check)) {
-        this.error = true
+        this.error = true;
+        this.inputByte = null;
       } else if (check == 0){
         this.inputByte = "0"  
       } else {
@@ -131,7 +132,8 @@ export default {
       this.inputByte = null
     },
     inputError(inputError){
-      this.error = inputError
+      this.error = inputError;
+      this.inputByte = null;
     }
   },
 
