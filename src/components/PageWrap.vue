@@ -16,61 +16,84 @@
         В двоичной форме: {{ binaryInputByte }}
       </p>
       <p>
-        В полиномиальной форме: <span ref="input-polynom"/> 
+        <label for="checkbox"><b>Замена по стандарту AES</b></label>
+        <input type="checkbox" id="checkbox" v-model="AESreplace">
       </p>
+      <div v-if="AESreplace">
+        <p>
+          Левая часть входного байта 
+          ({{ display.addHexPrefix(leftPartOfInputByte) }}) 
+          определяет номер строки
+        </p>
+        <p>
+          Правая часть входного байта 
+          ({{ display.addHexPrefix(rightPartOfInputByte) }})
+          определяет номер столбца
+        </p>
+        <p>
+          Выходной байт: {{tableValue('S')}}
+        </p>
+      </div>
       <p>
-        Левая часть входного байта 
-        ({{ display.addHexPrefix(leftPartOfInputByte) }}) 
-        определяет номер строки
+        <label for="checkbox"><b>Замена с помощью ПСКВ</b></label>
+        <input @change="showPolynom" type="checkbox" id="checkbox" v-model="PSRCreplace">
       </p>
-      <p>
-        Правая часть входного байта 
-        ({{ display.addHexPrefix(rightPartOfInputByte) }})
-        определяет номер столбца
-      </p>
+      <div v-if="PSRCreplace">
+        <p>
+          В полиномиальной форме: <span ref="input-polynom"/> 
+        </p>
+        <p>
+          Получим представление выходного байта в ПСКВ, поочерёдно разделив его на основания ПСКВ
+        </p>
+        <p>
+          Остаток от деления на <span ref="first-polynom"/> : <span ref="first-remainder"/>
+        </p>
+        <p>
+          Остаток от деления на <span ref="second-polynom"/> : <span ref="second-remainder"/>
+        </p>
+      </div>
     </div>
     <Table
-      v-if="inputByte"
+      v-if="inputByte && AESreplace"
       :type="tableTypes[0]"
       :bytes="standartTable"
       :tableId="'S'"
       :selectedElementRowIndex="convert.fromHexToDec(leftPartOfInputByte)"
       :selectedElementColIndex="convert.fromHexToDec(rightPartOfInputByte)"
     />
-    <!-- <button style="margin: 20px" @click="show = !show">
-      <img height="100px" src="../assets/double-arrows-down.png" alt="">
-    </button> -->
     
-    <div class="info-tables-wrapper" style="display: none">
-      <Table
-        
-        :type="tableTypes[1]"
-        :bytes="standartTable"
-        :tableId="'S1'"
-        :modulo="'x4+x+1'"
-      />
+    <div v-if="inputByte && PSRCreplace" class="tables-wrapper">
+      <div class="info-tables-wrapper">
+        <Table
+          :type="tableTypes[1]"
+          :bytes="standartTable"
+          :tableId="'S1'"
+          :modulo="firstFourthDegreePolynomial"
+        />
 
-      <Table
-        :type="tableTypes[1]"
-        :bytes="standartTable"
-        :tableId="'S2'"
-        :modulo="'x4+x3+1'"
-      />
+        <Table
+          :type="tableTypes[1]"
+          :bytes="standartTable"
+          :tableId="'S2'"
+          :modulo="secondFourthDegreePolynomial"
+        />
+      </div>
+      
+      <div class="control-tables-wrapper">
+        <Table
+          :type="tableTypes[2]"
+          :bytes="standartTable"
+          :tableId="'S1*'"
+        />
+
+        <Table
+          :type="tableTypes[2]"
+          :bytes="standartTable"
+          :tableId="'S2*'"
+        />
+      </div>
     </div>
     
-    <div class="control-tables-wrapper" style="display: none">
-      <Table
-        :type="tableTypes[2]"
-        :bytes="standartTable"
-        :tableId="'S1*'"
-      />
-
-      <Table
-        :type="tableTypes[2]"
-        :bytes="standartTable"
-        :tableId="'S2*'"
-      />
-    </div>
   </div>
 </template>
 
@@ -97,7 +120,12 @@ export default {
       convert: null,
       display: null,
       calculation: null,
-      error: false
+      error: false,
+      AESreplace: false,
+      PSRCreplace: false,
+      firstFourthDegreePolynomial: "x4+x+1",
+      secondFourthDegreePolynomial: "x4+x3+1",
+      thirdFourthDegreePolynomial: "x4+x3+x2+x+1"
     }
   },
 
@@ -111,6 +139,30 @@ export default {
   },
 
   methods: {
+    showPolynom() {
+      if (this.inputByte && this.PSRCreplace) {
+        this.$nextTick(()=> {
+          this.$refs["input-polynom"].innerHTML = this.polynomInputByte;  
+        })
+        this.$nextTick(()=> {
+          this.$refs["first-polynom"].innerHTML = this.display.indexesToTop(this.firstFourthDegreePolynomial);  
+        })
+        this.$nextTick(()=> {
+          this.$refs["first-remainder"].innerHTML = this.display.indexesToTop(this.firstRemainder);  
+        })
+        this.$nextTick(()=> {
+          this.$refs["second-polynom"].innerHTML = this.display.indexesToTop(this.secondFourthDegreePolynomial);  
+        })
+        this.$nextTick(()=> {
+          this.$refs["second-remainder"].innerHTML = this.display.indexesToTop(this.secondRemainder);  
+        })
+      } 
+    },
+
+    tableValue(tableId) {
+      return this.$store.getters.tableDataById(tableId);
+    },
+
     selectElement(input) {
       let check = Number(this.display.addHexPrefix(input))
       if (isNaN(check)) {
@@ -121,12 +173,10 @@ export default {
       } else {
         this.inputByte =  check;
       }
-      
-      if (this.inputByte) {
-        this.$nextTick(()=> {
-          this.$refs["input-polynom"].innerHTML = this.polynomInputByte;
-        })
-      } 
+      if (this.PSRCreplace) {
+        this.showPolynom();
+      }
+
     },
     reset() {
       this.inputByte = null
@@ -152,6 +202,18 @@ export default {
     
     rightPartOfInputByte() {
       return this.convert.toHex(this.inputByte).slice(1,2);
+    },
+
+    firstRemainder() {
+      let binFirstPolynom = this.convert.polynomToBinary(this.firstFourthDegreePolynomial)
+      let res = this.calculation.remainderAfterDividingByAPolynomial(this.binaryInputByte, binFirstPolynom)
+      return this.convert.binaryToPolynom(this.display.addBinPrefix(res))
+    },
+
+    secondRemainder() {
+      let binSecondPolynom = this.convert.polynomToBinary(this.secondFourthDegreePolynomial)
+      let res = this.calculation.remainderAfterDividingByAPolynomial(this.binaryInputByte, binSecondPolynom)
+      return this.convert.binaryToPolynom(this.display.addBinPrefix(res))
     }
   }
 }
@@ -165,10 +227,10 @@ export default {
     align-items: center;
     flex-direction: column;
     background: gainsboro;
-    min-height: 98vh;
+    min-height: 100vh;
 
     & * {
-      font-size: 18px;
+      font-size: 16px;
     }
   }
   .reset {
@@ -183,7 +245,9 @@ export default {
       cursor: pointer;
     }
   }
-
+  .tables-wrapper {
+    width: 100%;
+  }
   .info-tables-wrapper,
   .control-tables-wrapper {
     display: flex;

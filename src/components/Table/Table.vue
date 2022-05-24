@@ -1,22 +1,22 @@
 <template>
-    <table :id="'table-' + tableId">
-        <caption :ref="'table-caption' + tableId"></caption>
-        <thead>
-            <Square :num="'S'"/>
-            <th :colindex="h" v-for="h  in header" :key="h">
-                {{h}}
-            </th>
-        </thead>
-        <tbody>
-            <tr v-for="(line,rowIndex) in bytes" :key="rowIndex">
-                <th :colIndex="header[rowIndex]">{{header[rowIndex]}}</th>
-                <td v-for="(byte,colIndex) in line" :key="colIndex">
-                    <Square :rowIndex="rowIndex" :colIndex="colIndex" 
-                    :subByte="rowIndex == selectedElementRowIndex && colIndex == selectedElementColIndex" :num="display.addHexPrefix(convert.toHex(byte))"/>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+  <table :id="'table-' + tableId">
+    <caption :ref="'table-caption' + tableId"></caption>
+    <thead>
+      <Square :num="tableId"/>
+      <th :colindex="h" v-for="h  in header" :key="h">
+        {{h}}
+      </th>
+    </thead>
+    <tbody>
+      <tr v-for="(line,rowIndex) in bytes" :key="rowIndex">
+        <th :colIndex="header[rowIndex]">{{header[rowIndex]}}</th>
+        <td v-for="(byte,colIndex) in line" :key="colIndex">
+          <Square :rowIndex="rowIndex" :colIndex="colIndex" :tableId="tableId" 
+          :outputByte="rowIndex == selectedElementRowIndex && colIndex == selectedElementColIndex" :num="display.addHexPrefix(convert.toHex(byte))"/>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>

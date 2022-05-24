@@ -1,5 +1,5 @@
 <template>
-  <td class="cell" :class="subByte?'wow':''"
+  <td class="cell" :class="outputByte?'wow':''"
   >
     {{ num }}
   </td>
@@ -11,9 +11,10 @@
 export default {
   props: {
     num: String,
+    tableId: String,
     rowIndex: Number,
     colIndex: Number,
-    subByte:{
+    outputByte:{
       type: Boolean,
       default: false
     },
@@ -23,10 +24,11 @@ export default {
     }
   },
 
-  data: function () {
-    return {
+  mounted() {
+    if(this.outputByte) {
+      this.$store.dispatch("setTableData", {data: this.num, tableId: this.tableId })
     }
-  },
+  }
 
 }
 </script>
