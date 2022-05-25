@@ -6,7 +6,7 @@
       :message="'Введите значение входного байта'"
       :errorOnTop="error"
     />
-  
+    
     <div class="initial-data" v-if="inputByte && !error">
       <div @click="reset" class="reset">×</div>
       <p>
@@ -104,12 +104,14 @@ import Edit from './Edit/Edit.vue';
 import Convert from '../helpers/convert';
 import Display from '../helpers/display';
 import Calculation from '../helpers/calculation';
+import Checkbox from './Button/Checkbox.vue';
 
 export default {
 
   components: {
     Table,
-    Edit
+    Edit,
+    Checkbox
 },
 
   data: function () {
@@ -117,9 +119,6 @@ export default {
       standartTable: null,
       tableTypes: ["standart", "information", "control"],
       inputByte: null,
-      convert: null,
-      display: null,
-      calculation: null,
       error: false,
       AESreplace: false,
       PSRCreplace: false,
@@ -130,30 +129,20 @@ export default {
   },
 
   mounted() {
-    
     this.standartTable = new Standart().STANDART_TABLE();
     this.convert = new Convert(),
     this.display = new Display(),
     this.calculation = new Calculation()
-    
   },
 
   methods: {
     showPolynom() {
       if (this.inputByte && this.PSRCreplace) {
         this.$nextTick(()=> {
-          this.$refs["input-polynom"].innerHTML = this.polynomInputByte;  
-        })
-        this.$nextTick(()=> {
+          this.$refs["input-polynom"].innerHTML = this.polynomInputByte;
           this.$refs["first-polynom"].innerHTML = this.display.indexesToTop(this.firstFourthDegreePolynomial);  
-        })
-        this.$nextTick(()=> {
           this.$refs["first-remainder"].innerHTML = this.display.indexesToTop(this.firstRemainder);  
-        })
-        this.$nextTick(()=> {
           this.$refs["second-polynom"].innerHTML = this.display.indexesToTop(this.secondFourthDegreePolynomial);  
-        })
-        this.$nextTick(()=> {
           this.$refs["second-remainder"].innerHTML = this.display.indexesToTop(this.secondRemainder);  
         })
       } 
@@ -206,14 +195,14 @@ export default {
 
     firstRemainder() {
       let binFirstPolynom = this.convert.polynomToBinary(this.firstFourthDegreePolynomial)
-      let res = this.calculation.remainderAfterDividingByAPolynomial(this.binaryInputByte, binFirstPolynom)
-      return this.convert.binaryToPolynom(this.display.addBinPrefix(res))
+      let res = this.calculation.remainderAfterDividingByAPolynomial(this.display.addBinPrefix(this.binaryInputByte), this.display.addBinPrefix(binFirstPolynom))
+      return this.convert.binaryToPolynom(this.convert.toBin(res))
     },
 
     secondRemainder() {
       let binSecondPolynom = this.convert.polynomToBinary(this.secondFourthDegreePolynomial)
-      let res = this.calculation.remainderAfterDividingByAPolynomial(this.binaryInputByte, binSecondPolynom)
-      return this.convert.binaryToPolynom(this.display.addBinPrefix(res))
+      let res = this.calculation.remainderAfterDividingByAPolynomial(this.display.addBinPrefix(this.binaryInputByte), this.display.addBinPrefix(binSecondPolynom)) 
+      return this.convert.binaryToPolynom(this.convert.toBin(res))
     }
   }
 }
@@ -230,7 +219,7 @@ export default {
     min-height: 100vh;
 
     & * {
-      font-size: 16px;
+      font-size: 18px;
     }
   }
   .reset {

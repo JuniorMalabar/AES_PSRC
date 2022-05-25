@@ -1,8 +1,8 @@
 <template>
-  <td class="cell" :class="outputByte?'wow':''"
+  <div class="cell" :class="outputByte?'wow':''"
   >
     {{ num }}
-  </td>
+  </div>
 </template>
 
 <script>
@@ -39,13 +39,13 @@ export default {
 .cell {
   display: flex;
   justify-content: center;
-  align-self: start;
+  align-items: center;
   border: 1px solid black;
   padding: 10px;
   width: 20px;
   height: 20px;
   background: white;
-  font-size: 16px;
+  font-size: 14px;
   &:hover {
     cursor: pointer
   }
