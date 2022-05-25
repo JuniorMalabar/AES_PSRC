@@ -1,4 +1,4 @@
-import _ from 'lodash'
+
 class Convert {
 
     toHex(num) {
@@ -46,31 +46,21 @@ class Convert {
     }
 
     polynomToBinary (polynom) {
-      if(polynom == "x") {
-        return "00000010"
-      } else {
-        let binary = '00000000'.split('')
-        let positions = []
-        if(_.includes(polynom, "+x+")) {
-          positions.push('x')
+      let binary = '00000000'.split('')
+      let positions = []
+      polynom.split('+').forEach(el => {
+        if (el == "x") {
+          positions.push("1")
+        } else if(el == "1") {
+          positions.push("0")
+        } else {
+          positions.push(el[1])
         }
-        positions.push(_.filter(polynom,
-          (c) => { 
-            return Number(c) == c
-          }))
-        positions = _.flatMap(positions)
-        for (let i = 0; i < positions.length; i++) {
-          if (positions[i] == 1) {
-            binary[positions[i] - 1] = '1'
-          } else if (positions[i] == 'x') {
-            binary[1] = '1'
-          } else {
-            binary[positions[i]] = '1'
-          }
-        }
-        
-        return binary.reverse().join('')
+      });
+      for (let i = 0; i < positions.length; i++) {
+        binary[positions[i]] = '1'
       }
+      return binary.reverse().join('')
     }
 }
 

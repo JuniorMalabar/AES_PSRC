@@ -31,7 +31,7 @@
           определяет номер столбца
         </p>
         <p>
-          Выходной байт: {{tableValue('S')}}
+          Выходной байт: <b>{{tableValue('S')}}</b>
         </p>
       </div>
       <p>
@@ -43,13 +43,28 @@
           В полиномиальной форме: <span ref="input-polynom"/> 
         </p>
         <p>
-          Получим представление выходного байта в ПСКВ, поочерёдно разделив его на основания ПСКВ
+          Получим представление входного байта в ПСКВ, поочерёдно разделив его на основания ПСКВ
         </p>
         <p>
           Остаток от деления на <span ref="first-polynom"/> : <span ref="first-remainder"/>
         </p>
         <p>
           Остаток от деления на <span ref="second-polynom"/> : <span ref="second-remainder"/>
+        </p>
+        <p>
+          Представление входного байта в ПСКВ: ( <span ref="first-remainder"/>, <span ref="second-remainder"/> )
+        </p>
+        <p>
+          Выходной байт первой информационной таблицы: <b>{{tableValue('S1')}}</b>
+        </p>
+        <p>
+          Выходной байт второй информационной таблицы: <b>{{tableValue('S2')}}</b>
+        </p>
+        <p>
+          Выходной байт первой контрольной таблицы: <b>{{tableValue('S1*')}}</b>
+        </p>
+        <p>
+          Выходной байт второй контрольной таблицы: <b>{{tableValue('S2*')}}</b>
         </p>
       </div>
     </div>
@@ -68,6 +83,8 @@
           :type="tableTypes[1]"
           :bytes="standartTable"
           :tableId="'S1'"
+          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
+          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
           :modulo="firstFourthDegreePolynomial"
         />
 
@@ -75,6 +92,8 @@
           :type="tableTypes[1]"
           :bytes="standartTable"
           :tableId="'S2'"
+          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
+          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
           :modulo="secondFourthDegreePolynomial"
         />
       </div>
@@ -84,12 +103,16 @@
           :type="tableTypes[2]"
           :bytes="standartTable"
           :tableId="'S1*'"
+          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
+          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
         />
 
         <Table
           :type="tableTypes[2]"
           :bytes="standartTable"
           :tableId="'S2*'"
+          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
+          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
         />
       </div>
     </div>
@@ -155,6 +178,7 @@ export default {
       if (isNaN(check)) {
         this.error = true;
         this.inputByte = null;
+      this.$store.dispatch("resetTableData")
       } else if (check == 0){
         this.inputByte = "0"  
       } else {
@@ -166,7 +190,8 @@ export default {
 
     },
     reset() {
-      this.inputByte = null
+      this.inputByte = null;
+      this.$store.dispatch("resetTableData")
     },
     inputError(inputError){
       this.error = inputError;

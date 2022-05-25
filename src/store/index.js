@@ -23,12 +23,18 @@ export default new Vuex.Store({
   mutations: {
     setTableData(state, { data, tableId }) {
       Vue.set(state.tableData, tableId, data);
+    },
+    resetTableData(state) {
+      state.tableData = [];
     }
   },
 
   actions: {
     setTableData({ commit }, { data, tableId }) {
       commit("setTableData", { data, tableId });
+    },
+    resetTableData({ commit }) {
+      commit("resetTableData");
     }
   }
 })

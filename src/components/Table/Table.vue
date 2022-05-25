@@ -64,7 +64,7 @@ export default {
     mounted() {
         let tableCaption = this.$refs["table-caption" + this.tableId];
         if(this.modulo){
-            tableCaption.innerHTML= this.display.indexesToTop(this.modulo)
+            tableCaption.innerHTML= "Основание " + this.display.indexesToTop(this.modulo)
         } else if (this.type == "standart") {
             tableCaption.innerHTML = "Таблица замен стандарта AES";
         } else if (this.type == "control") {
