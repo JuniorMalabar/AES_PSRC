@@ -6,7 +6,7 @@
       :message="'Введите значение входного байта'"
       :errorOnTop="error"
     />
-    
+
     <div class="initial-data" v-if="inputByte && !error">
       <div @click="reset" class="reset">×</div>
       <p>
@@ -104,14 +104,12 @@ import Edit from './Edit/Edit.vue';
 import Convert from '../helpers/convert';
 import Display from '../helpers/display';
 import Calculation from '../helpers/calculation';
-import Checkbox from './Button/Checkbox.vue';
 
 export default {
 
   components: {
     Table,
-    Edit,
-    Checkbox
+    Edit
 },
 
   data: function () {
@@ -212,7 +210,7 @@ export default {
 <style lang="scss" scoped>
   .main-wrap {
     display: flex;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     flex-direction: column;
     background: gainsboro;
