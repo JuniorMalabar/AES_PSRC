@@ -25,7 +25,7 @@ export default new Vuex.Store({
       Vue.set(state.tableData, tableId, data);
     },
     resetTableData(state) {
-      state.tableData = [];
+      state.tableData = {};
     }
   },
 
