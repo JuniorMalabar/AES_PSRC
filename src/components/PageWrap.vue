@@ -52,7 +52,7 @@
           Остаток от деления на <span ref="second-polynom"/> : <span ref="second-remainder"/>
         </p>
         <p>
-          Представление входного байта в ПСКВ: ( <span ref="first-remainder"/>, <span ref="second-remainder"/> )
+          Представление входного байта в ПСКВ: ( <span ref="PSRC-first-remainder"/>, <span ref="PSRC-second-remainder"/> )
         </p>
         <p>
           Выходной байт первой информационной таблицы: <b>{{tableValue('S1')}}</b>
@@ -163,8 +163,10 @@ export default {
           this.$refs["input-polynom"].innerHTML = this.polynomInputByte;
           this.$refs["first-polynom"].innerHTML = this.display.indexesToTop(this.firstFourthDegreePolynomial);  
           this.$refs["first-remainder"].innerHTML = this.display.indexesToTop(this.firstRemainder);  
+          this.$refs["PSRC-first-remainder"].innerHTML = this.display.indexesToTop(this.firstRemainder);  
           this.$refs["second-polynom"].innerHTML = this.display.indexesToTop(this.secondFourthDegreePolynomial);  
           this.$refs["second-remainder"].innerHTML = this.display.indexesToTop(this.secondRemainder);  
+          this.$refs["PSRC-second-remainder"].innerHTML = this.display.indexesToTop(this.secondRemainder);  
         })
       } 
     },
@@ -178,21 +180,24 @@ export default {
       if (isNaN(check)) {
         this.error = true;
         this.inputByte = null;
-      this.$store.dispatch("resetTableData")
       } else if (check == 0){
         this.inputByte = "0"  
       } else {
         this.inputByte =  check;
       }
-      if (this.PSRCreplace) {
+      if (this.PSRCreplace || this.AESreplace) {
         this.showPolynom();
       }
 
     },
+
     reset() {
       this.inputByte = null;
+      this.AESreplace = false;
+      this.PSRCreplace = false;
       this.$store.dispatch("resetTableData")
     },
+
     inputError(inputError){
       this.error = inputError;
       this.inputByte = null;

@@ -24,9 +24,14 @@ export default {
     }
   },
 
-  mounted() {
-    if(this.outputByte) {
-      this.$store.dispatch("setTableData", {data: this.num, tableId: this.tableId })
+  watch: {
+    outputByte: {
+      immediate: true,
+      handler(value) {
+        if(value) {
+          this.$store.dispatch("setTableData", {data: this.num, tableId: this.tableId })
+        }
+      }
     }
   }
 
