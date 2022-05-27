@@ -222,14 +222,14 @@ export default {
     },
 
     firstRemainder() {
-      let binFirstPolynom = this.convert.polynomToBinary(this.firstFourthDegreePolynomial)
-      let res = this.calculation.remainderAfterDividingByAPolynomial(this.display.addBinPrefix(this.binaryInputByte), this.display.addBinPrefix(binFirstPolynom))
+      let res = this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.binaryInputByte), this.firstFourthDegreePolynomial)
       return this.convert.binaryToPolynom(this.convert.toBin(res))
     },
 
     secondRemainder() {
-      let binSecondPolynom = this.convert.polynomToBinary(this.secondFourthDegreePolynomial)
-      let res = this.calculation.remainderAfterDividingByAPolynomial(this.display.addBinPrefix(this.binaryInputByte), this.display.addBinPrefix(binSecondPolynom)) 
+      let res = this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.binaryInputByte), this.secondFourthDegreePolynomial) 
+      console.log("🚀 ~ file: PageWrap.vue ~ line 231 ~ secondRemainder ~ res", res)
+      console.log()
       return this.convert.binaryToPolynom(this.convert.toBin(res))
     }
   }
