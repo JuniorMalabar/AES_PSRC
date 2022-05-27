@@ -57,7 +57,7 @@ export default {
   font-size: 14px;
   transition: 1s;
   &:hover {
-    cursor: pointer
+    cursor: default
   }
 
   &.path {

@@ -19,7 +19,7 @@ class Calculation {
   remainderAfterDividingAPolynomialByAPolynomial(polynom_1, polynom_2) {
 
     if (polynom_1 == polynom_2) {
-      return 0;
+      return [0];
     }
 
     let degrees_1 = this.getPolynomialDegrees(polynom_1);
@@ -42,7 +42,9 @@ class Calculation {
 
   binaryByDegrees(degrees) {
     let binary = '00000000'.split('')
-
+    if( typeof degrees === 'string') {
+      degrees = this.getPolynomialDegrees(degrees)
+    }
     for (let i = 0; i < degrees.length; i++) {
       binary[degrees[i]] = '1'
     }

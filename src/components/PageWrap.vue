@@ -155,6 +155,24 @@ export default {
     this.convert = new Convert(),
     this.display = new Display(),
     this.calculation = new Calculation()
+    
+                // this.convert.toHex(
+                //   this.convert.fromBinToDec(
+                //     this.calculation.binaryByDegrees(
+                //       +this.calculation.remainderAfterDividingAPolynomialByAPolynomial(  
+                //         +this.convert.binaryToPolynom(
+                //           +this.calculation.binaryByDegrees(
+                //             +this.calculation.moduloAddition(fromFirst, fromSecond)
+                //           )
+                //         ),
+                //         "x4+x3+x2+x+1"
+                //       )
+                //     )
+                //   )
+                // )
+    console.log(
+      this.calculation.binaryByDegrees('x2+x+1')
+    )         
   },
 
   methods: {
@@ -210,18 +228,58 @@ export default {
             }
             newCollection.push(line)
           }
-          console.log(newCollection)
           return newCollection
       } else if (tableId == "S2*") {
-          return _.map(collection, 
-            (line) => { 
-              return _.map(line, 
-                (el) => {
-                  return this.convert.fromBinToDec(this.calculation.binaryByDegrees(this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.convert.toBin(el)), this.secondFourthDegreePolynomial)))
-                }
+          let newCollection = []
+          for (let i = 0; i < collection[0].length; i++) {
+            let line = []
+            for (let j = 0; j < collection[1].length; j++) {
+              let fromFirst = this.calculation.getPolynomialDegrees(
+                this.convert.binaryToPolynom(
+                  this.convert.toBin(
+                    collection[0][i][j]
+                  )
+                )
               )
+              
+
+              
+              
+              let fromSecond = this.calculation.getPolynomialDegrees(
+                this.calculation.multiplicationOnX(
+                  this.convert.binaryToPolynom(
+                    this.convert.toBin(
+                      collection[1][i][j]
+                    )
+                  )
+                )
+              )
+
+              
+              
+              line.push(
+                this.convert.toHex(
+                  this.convert.fromBinToDec(
+                    this.calculation.binaryByDegrees(
+                      this.calculation.remainderAfterDividingAPolynomialByAPolynomial(  
+                        this.convert.binaryToPolynom(
+                          this.calculation.binaryByDegrees(
+                            this.calculation.moduloAddition(fromFirst, fromSecond)
+                          )
+                        ),
+                        "x4+x3+x2+x+1"
+                      )
+                    )
+                  )
+                )
+              )
+
+              
+              
             }
-          )
+            newCollection.push(line)
+          }
+          return newCollection
       } else return collection
     },
     showPolynom() {
