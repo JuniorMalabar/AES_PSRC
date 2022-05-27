@@ -81,7 +81,7 @@
       <div class="info-tables-wrapper">
         <Table
           :type="tableTypes[1]"
-          :bytes="standartTable"
+          :bytes="firstInfoTableData"
           :tableId="'S1'"
           :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
           :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
@@ -90,7 +90,7 @@
 
         <Table
           :type="tableTypes[1]"
-          :bytes="standartTable"
+          :bytes="secondInfoTableData"
           :tableId="'S2'"
           :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
           :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
@@ -101,7 +101,7 @@
       <div class="control-tables-wrapper">
         <Table
           :type="tableTypes[2]"
-          :bytes="standartTable"
+          :bytes="firstControlTableData"
           :tableId="'S1*'"
           :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
           :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
@@ -109,7 +109,7 @@
 
         <Table
           :type="tableTypes[2]"
-          :bytes="standartTable"
+          :bytes="secondControlTableData"
           :tableId="'S2*'"
           :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
           :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
@@ -127,6 +127,7 @@ import Edit from './Edit/Edit.vue';
 import Convert from '../helpers/convert';
 import Display from '../helpers/display';
 import Calculation from '../helpers/calculation';
+import _ from 'lodash'
 
 export default {
 
@@ -145,7 +146,7 @@ export default {
       PSRCreplace: false,
       firstFourthDegreePolynomial: "x4+x+1",
       secondFourthDegreePolynomial: "x4+x3+1",
-      thirdFourthDegreePolynomial: "x4+x3+x2+x+1"
+      thirdFourthDegreePolynomial: "x4+x3+x2+x+1",
     }
   },
 
@@ -157,6 +158,72 @@ export default {
   },
 
   methods: {
+    newTableData(collection, tableId) {
+      if (tableId == "S1") {
+          return _.map(collection, 
+            (line) => { 
+              return _.map(line, 
+                (el) => {
+                  return this.convert.fromBinToDec(this.calculation.binaryByDegrees(this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.convert.toBin(el)), this.firstFourthDegreePolynomial)))
+                }
+              )
+            }
+          )
+      } else if (tableId == "S2") {
+          return _.map(collection, 
+            (line) => { 
+              return _.map(line, 
+                (el) => {
+                  return this.convert.fromBinToDec(this.calculation.binaryByDegrees(this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.convert.toBin(el)), this.secondFourthDegreePolynomial)))
+                }
+              )
+            }
+          )
+      } else if (tableId == "S1*") {
+          let newCollection = []
+          for (let i = 0; i < collection[0].length; i++) {
+            let line = []
+            for (let j = 0; j < collection[1].length; j++) {
+              let fromFirst = this.calculation.getPolynomialDegrees(
+                this.convert.binaryToPolynom(
+                  this.convert.toBin(
+                    collection[0][i][j]
+                  )
+                )
+              )
+              let fromSecond = this.calculation.getPolynomialDegrees(
+                this.convert.binaryToPolynom(
+                  this.convert.toBin(
+                    collection[1][i][j]
+                  )
+                )
+              )
+              line.push(
+                this.convert.toHex(
+                  this.convert.fromBinToDec(
+                    this.calculation.binaryByDegrees(
+                      this.calculation.moduloAddition(fromFirst, fromSecond)
+                    )
+                  )
+                ) 
+              )
+            }
+            newCollection.push(line)
+          }
+          console.log(newCollection)
+          return newCollection
+      } else if (tableId == "S2*") {
+          return _.map(collection, 
+            (line) => { 
+              return _.map(line, 
+                (el) => {
+                  return this.convert.fromBinToDec(this.calculation.binaryByDegrees(this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.convert.toBin(el)), this.secondFourthDegreePolynomial)))
+                }
+              )
+            }
+          )
+      } else return collection
+    },
     showPolynom() {
       if (this.inputByte && this.PSRCreplace) {
         this.$nextTick(()=> {
@@ -205,6 +272,22 @@ export default {
   },
 
   computed: {
+    firstInfoTableData() {
+      return this.newTableData(this.standartTable, 'S1')
+    },
+
+    secondInfoTableData() {
+      return this.newTableData(this.standartTable, 'S2')
+    },
+
+    firstControlTableData() {
+      return this.newTableData([this.firstInfoTableData, this.secondInfoTableData], 'S1*')
+    },
+
+    secondControlTableData() {
+      return this.newTableData([this.firstInfoTableData, this.secondInfoTableData], 'S2*')
+    },
+
     binaryInputByte() {
       return this.convert.toBin(this.inputByte);
     },
@@ -223,14 +306,12 @@ export default {
 
     firstRemainder() {
       let res = this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.binaryInputByte), this.firstFourthDegreePolynomial)
-      return this.convert.binaryToPolynom(this.convert.toBin(res))
+      return this.convert.binaryToPolynom(this.calculation.binaryByDegrees(res))
     },
 
     secondRemainder() {
       let res = this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.binaryInputByte), this.secondFourthDegreePolynomial) 
-      console.log("🚀 ~ file: PageWrap.vue ~ line 231 ~ secondRemainder ~ res", res)
-      console.log()
-      return this.convert.binaryToPolynom(this.convert.toBin(res))
+      return this.convert.binaryToPolynom(this.calculation.binaryByDegrees(res))
     }
   }
 }
@@ -243,7 +324,7 @@ export default {
     justify-content: start;
     align-items: center;
     flex-direction: column;
-    background: gainsboro;
+    background: #E7EBF1;
     min-height: 100vh;
 
     & * {

@@ -1,5 +1,5 @@
 <template>
-  <div class="cell" :class="outputByte?'wow':''"
+  <div class="cell" :class="{ output: outputByte, path: pathToOutputByte && !outputByte }"
   >
     {{ num }}
   </div>
@@ -14,6 +14,10 @@ export default {
     tableId: String,
     rowIndex: Number,
     colIndex: Number,
+    pathToOutputByte: {
+      type: Boolean,
+      default: false
+    },
     outputByte:{
       type: Boolean,
       default: false
@@ -51,12 +55,17 @@ export default {
   height: 20px;
   background: white;
   font-size: 14px;
+  transition: 1s;
   &:hover {
     cursor: pointer
   }
 
-  &.wow{
-    background: rgba(#008000,0.2);
+  &.path {
+    background: rgba(22, 62, 115, 0.1);
+  }
+
+  &.output{
+    background: rgba(#008000,0.3);
     color: black;
     border-color: #008000;
   }

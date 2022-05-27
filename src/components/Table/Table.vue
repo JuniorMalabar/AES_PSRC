@@ -11,7 +11,8 @@
       <tr v-for="(line,rowIndex) in bytes" :key="rowIndex">
         <th :colIndex="header[rowIndex]">{{header[rowIndex]}}</th>
         <td v-for="(byte,colIndex) in line" :key="colIndex">
-          <Square :rowIndex="rowIndex" :colIndex="colIndex" :tableId="tableId" 
+          <Square :rowIndex="rowIndex" :colIndex="colIndex" :tableId="tableId"
+          :pathToOutputByte="rowIndex == selectedElementRowIndex || colIndex == selectedElementColIndex" 
           :outputByte="rowIndex == selectedElementRowIndex && colIndex == selectedElementColIndex" :num="display.addHexPrefix(convert.toHex(byte))"/>
         </td>
       </tr>
