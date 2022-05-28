@@ -154,25 +154,7 @@ export default {
     this.standartTable = new Standart().STANDART_TABLE();
     this.convert = new Convert(),
     this.display = new Display(),
-    this.calculation = new Calculation()
-    
-                // this.convert.toHex(
-                //   this.convert.fromBinToDec(
-                //     this.calculation.binaryByDegrees(
-                //       +this.calculation.remainderAfterDividingAPolynomialByAPolynomial(  
-                //         +this.convert.binaryToPolynom(
-                //           +this.calculation.binaryByDegrees(
-                //             +this.calculation.moduloAddition(fromFirst, fromSecond)
-                //           )
-                //         ),
-                //         "x4+x3+x2+x+1"
-                //       )
-                //     )
-                //   )
-                // )
-    console.log(
-      this.calculation.binaryByDegrees('x2+x+1')
-    )         
+    this.calculation = new Calculation()    
   },
 
   methods: {
