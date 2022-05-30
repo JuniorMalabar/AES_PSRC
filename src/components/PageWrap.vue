@@ -3,7 +3,7 @@
     <Edit 
       @select-element="selectElement"
       @input-error="inputError"
-      :message="'Введите значение входного байта'"
+      :message="'Введите значение входного байта в шестнадцатеричной системе счисления'"
       :errorOnTop="error"
     />
 
@@ -154,10 +154,56 @@ export default {
     this.standartTable = new Standart().STANDART_TABLE();
     this.convert = new Convert(),
     this.display = new Display(),
-    this.calculation = new Calculation()    
+    this.calculation = new Calculation()
+    this.test(this.standartTable)   
   },
 
   methods: {
+    test(collection) {
+      let zeros = new Standart().ZEROS_TABLE();
+      console.log(collection)
+      for (let row = 0; row < collection.length; row++) {
+        for (let col = 0; col < collection.length; col++) {
+          let rowInd = this.convert.toHexWithoutZeros(row)
+          let colInd = this.convert.toHexWithoutZeros(col)
+          let oldByte = collection[row][col]
+          let rowCol = rowInd + colInd
+          
+          let newRow = this.convert.fromBinToDec(
+            this.calculation.binaryByDegrees(
+              this.calculation.remainderAfterDividingAPolynomialByAPolynomial(
+                this.convert.binaryToPolynom(
+                  this.convert.toBin(
+                    this.convert.fromHexToDec(rowCol)
+                  )
+                ), this.firstFourthDegreePolynomial
+              )
+            )
+          )
+          let newCol = this.convert.fromBinToDec(
+            this.calculation.binaryByDegrees(
+              this.calculation.remainderAfterDividingAPolynomialByAPolynomial(
+                this.convert.binaryToPolynom(
+                  this.convert.toBin(
+                    this.convert.fromHexToDec(rowCol)
+                  )
+                ), this.secondFourthDegreePolynomial
+              )
+            )
+          )
+          if(newRow == 10 && newCol == 1 && zeros[newRow][newCol] != '0x00') {
+            zeros[newRow][newCol-1] = oldByte
+          } else if (newRow == 1 && newCol == 10  && zeros[newRow][newCol] != '0x00') {
+            zeros[newRow-1][newCol] = oldByte
+          } else {
+            zeros[newRow][newCol] = oldByte
+          }
+          
+        }
+        
+      }
+      console.log(zeros)
+    },
     newTableData(collection, tableId) {
       if (tableId == "S1") {
           return _.map(collection, 
@@ -223,10 +269,6 @@ export default {
                   )
                 )
               )
-              
-
-              
-              
               let fromSecond = this.calculation.getPolynomialDegrees(
                 this.calculation.multiplicationOnX(
                   this.convert.binaryToPolynom(
@@ -236,9 +278,6 @@ export default {
                   )
                 )
               )
-
-              
-              
               line.push(
                 this.convert.toHex(
                   this.convert.fromBinToDec(
@@ -254,10 +293,7 @@ export default {
                     )
                   )
                 )
-              )
-
-              
-              
+              )  
             }
             newCollection.push(line)
           }

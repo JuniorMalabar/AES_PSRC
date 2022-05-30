@@ -1,6 +1,11 @@
 
 class Convert {
 
+  toHexWithoutZeros(num) {
+    num = num.toString(16)
+    return num
+  }
+
   toHex(num) {
     num = num.toString(16)
     if (num.length < 2) {
