@@ -16,8 +16,8 @@
         В двоичной форме: {{ binaryInputByte }}
       </p>
       <p>
-        <label for="checkbox"><b>Замена по стандарту AES</b></label>
-        <input type="checkbox" id="checkbox" v-model="AESreplace">
+        <label for="aes-checkbox"><b>Замена по стандарту AES</b></label>
+        <input type="checkbox" id="aes-checkbox" v-model="AESreplace">
       </p>
       <div v-if="AESreplace">
         <p>
@@ -35,8 +35,8 @@
         </p>
       </div>
       <p>
-        <label for="checkbox"><b>Замена с помощью ПСКВ</b></label>
-        <input @change="showPolynom" type="checkbox" id="checkbox" v-model="PSRCreplace">
+        <label for="psrc-checkbox"><b>Замена с помощью ПСКВ</b></label>
+        <input @change="showPolynom" type="checkbox" id="psrc-checkbox" v-model="PSRCreplace">
       </p>
       <div v-if="PSRCreplace">
         <p>
@@ -66,6 +66,47 @@
         <p>
           Выходной байт второй контрольной таблицы: <b>{{tableValue('S2*')}}</b>
         </p>
+      </div>
+      <p v-if="PSRCreplace">
+        <label for="error-checkbox"><b>Внести ошибку</b></label>
+        <input type="checkbox" id="error-checkbox" v-model="addError">
+      </p>
+      <div v-if="addError" class="choose-error-place">
+        <div class="choose-wrapper">
+          <div class="choose-base">
+            <p>
+              Выбор основания
+            </p>
+            <input type="radio" @click="toggleBaseRadioButton" id="1Base" value="0" v-model="erroneousBasis">
+            <label for="1Base">Первое основание</label>
+            <br>
+            <input type="radio" id="2Base" value="1" v-model="erroneousBasis">
+            <label for="2Base">Второе основание</label>
+            <br>
+            <input type="radio" id="3Base" value="2" v-model="erroneousBasis">
+            <label for="4Base">Третье основание</label>
+            <br>
+            <input type="radio" id="4Base" value="3" v-model="erroneousBasis">
+            <label for="4Base">Четвёртое основание</label>
+          </div>
+          <div v-if="erroneousBasis" class="choose-bit">
+            <p>
+              Выбор разряда
+            </p>
+            <input type="radio" id="1Bit" value="0" v-model="erroneousBit">
+            <label for="1Bit">Первый разряд</label>
+            <br>
+            <input type="radio" id="2Bit" value="1" v-model="erroneousBit">
+            <label for="2Bit">Второй разряд</label>
+            <br>
+            <input type="radio" id="3Bit" value="2" v-model="erroneousBit">
+            <label for="3Bit">Третий разряд</label>
+            <br>
+            <input type="radio" id="4Bit" value="3" v-model="erroneousBit">
+            <label for="4Bit">Четвёртый разряд</label>
+          </div>
+        </div>
+        <span class="choose-res" v-if="erroneousBasis&&erroneousBit">Ошибка в {{ Number(erroneousBit)+1 }} разряде {{ Number(erroneousBasis)+1 }} основания </span>
       </div>
     </div>
     <Table
@@ -134,7 +175,7 @@ export default {
   components: {
     Table,
     Edit
-},
+  },
 
   data: function () {
     return {
@@ -144,6 +185,9 @@ export default {
       error: false,
       AESreplace: false,
       PSRCreplace: false,
+      addError: false,
+      erroneousBasis: '',
+      erroneousBit: '',
       firstFourthDegreePolynomial: "x4+x+1",
       secondFourthDegreePolynomial: "x4+x3+1",
       thirdFourthDegreePolynomial: "x4+x3+x2+x+1",
@@ -157,6 +201,7 @@ export default {
     this.calculation = new Calculation()
     this.test(this.standartTable)   
   },
+
 
   methods: {
     test(collection) {
@@ -203,6 +248,9 @@ export default {
         
       }
       console.log(zeros)
+    },
+    toggleBaseRadioButton() {
+      console.log(this)
     },
     newTableData(collection, tableId) {
       if (tableId == "S1") {
@@ -338,6 +386,9 @@ export default {
       this.inputByte = null;
       this.AESreplace = false;
       this.PSRCreplace = false;
+      this.addError = false;
+      this.erroneousBasis = '';
+      this.erroneousBit = '';
       this.$store.dispatch("resetTableData")
     },
 
@@ -438,6 +489,31 @@ export default {
     p {
       text-align: center;
       margin: 5px 0;
+    }
+  }
+
+  .choose-error-place {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .choose-wrapper {
+      display: flex;
+      .choose-base {
+        margin-right: 30px;
+      }
+
+      p {
+        text-align: start;
+        font-weight: bold;
+      }
+
+      input:checked + label  {
+        font-weight: bold;
+      } 
+    }
+    span.choose-res {
+      margin-top: 10px;
     }
   }
 </style>
