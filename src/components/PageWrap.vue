@@ -71,22 +71,22 @@
         <label for="error-checkbox"><b>Внести ошибку</b></label>
         <input type="checkbox" id="error-checkbox" v-model="addError">
       </p>
-      <div v-if="addError" class="choose-error-place">
+      <div v-if="addError && PSRCreplace" class="choose-error-place">
         <div class="choose-wrapper">
           <div class="choose-base">
             <p>
               Выбор основания
             </p>
-            <input type="radio" @click="toggleBaseRadioButton" id="1Base" value="0" v-model="erroneousBasis">
+            <input type="radio" id="1Base" value="S1" v-model="erroneousBasis">
             <label for="1Base">Первое основание</label>
             <br>
-            <input type="radio" id="2Base" value="1" v-model="erroneousBasis">
+            <input type="radio" id="2Base" value="S2" v-model="erroneousBasis">
             <label for="2Base">Второе основание</label>
             <br>
-            <input type="radio" id="3Base" value="2" v-model="erroneousBasis">
+            <input type="radio" id="3Base" value="S1*" v-model="erroneousBasis">
             <label for="4Base">Третье основание</label>
             <br>
-            <input type="radio" id="4Base" value="3" v-model="erroneousBasis">
+            <input type="radio" id="4Base" value="S2*" v-model="erroneousBasis">
             <label for="4Base">Четвёртое основание</label>
           </div>
           <div v-if="erroneousBasis" class="choose-bit">
@@ -106,7 +106,24 @@
             <label for="4Bit">Четвёртый разряд</label>
           </div>
         </div>
-        <span class="choose-res" v-if="erroneousBasis&&erroneousBit">Ошибка в {{ Number(erroneousBit)+1 }} разряде {{ Number(erroneousBasis)+1 }} основания </span>
+        <span class="choose-res" v-if="erroneousBasis&&erroneousBit">Ошибка в {{ erroneousBitShow }} разряде {{ erroneousBasisShow }} основания </span>
+        <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="addErrorToBases">Внести</button>
+
+        <div v-if="erroneousBasis&&erroneousBit&&openErrorInfo">
+          <p>В результате воздействия ошибки получены следующие значения:</p>
+          <p>
+            Выходной байт первой информационной таблицы: <b>{{tableValueWithError('S1')}}</b>
+          </p>
+          <p>
+            Выходной байт второй информационной таблицы: <b>{{tableValueWithError('S2')}}</b>
+          </p>
+          <p>
+            Выходной байт первой контрольной таблицы: <b>{{tableValueWithError('S1*')}}</b>
+          </p>
+          <p>
+            Выходной байт второй контрольной таблицы: <b>{{tableValueWithError('S2*')}}</b>
+          </p>
+        </div>
       </div>
     </div>
     <Table
@@ -168,7 +185,6 @@ import Edit from './Edit/Edit.vue';
 import Convert from '../helpers/convert';
 import Display from '../helpers/display';
 import Calculation from '../helpers/calculation';
-import _ from 'lodash'
 
 export default {
 
@@ -191,6 +207,7 @@ export default {
       firstFourthDegreePolynomial: "x4+x+1",
       secondFourthDegreePolynomial: "x4+x3+1",
       thirdFourthDegreePolynomial: "x4+x3+x2+x+1",
+      openErrorInfo: false
     }
   },
 
@@ -199,19 +216,39 @@ export default {
     this.convert = new Convert(),
     this.display = new Display(),
     this.calculation = new Calculation()
-    this.test(this.standartTable)   
   },
 
+  watch: {
+    addError: {
+      handler(newVal) {
+        this.erroneousBasis = ''
+        this.erroneousBit = ''
+        this.openErrorInfo = false
+        return newVal
+      },
+      immediate: true
+    }
+  },
 
   methods: {
-    test(collection) {
-      let zeros = new Standart().ZEROS_TABLE();
-      console.log(collection)
+    generateInfoTable(collection, tablePolynom) {
+      let newCollection = new Standart().ZEROS_TABLE();
       for (let row = 0; row < collection.length; row++) {
         for (let col = 0; col < collection.length; col++) {
           let rowInd = this.convert.toHexWithoutZeros(row)
           let colInd = this.convert.toHexWithoutZeros(col)
-          let oldByte = collection[row][col]
+          let oldByteByTableModulo =
+          this.convert.fromBinToDec(
+            this.calculation.binaryByDegrees(
+              this.calculation.remainderAfterDividingAPolynomialByAPolynomial(
+                this.convert.binaryToPolynom(
+                  this.convert.toBin(collection[row][col])
+                ), 
+                tablePolynom
+              )
+            )
+          )
+          console.log(oldByteByTableModulo)
           let rowCol = rowInd + colInd
           
           let newRow = this.convert.fromBinToDec(
@@ -236,43 +273,46 @@ export default {
               )
             )
           )
-          if(newRow == 10 && newCol == 1 && zeros[newRow][newCol] != '0x00') {
-            zeros[newRow][newCol-1] = oldByte
-          } else if (newRow == 1 && newCol == 10  && zeros[newRow][newCol] != '0x00') {
-            zeros[newRow-1][newCol] = oldByte
+          if(newRow == 10 && newCol == 1 && newCollection[newRow][newCol] != '0x00') {
+            newCollection[newRow][newCol-1] = oldByteByTableModulo
+          } else if (newRow == 1 && newCol == 10  && newCollection[newRow][newCol] != '0x00') {
+            newCollection[newRow-1][newCol] = oldByteByTableModulo
           } else {
-            zeros[newRow][newCol] = oldByte
+            newCollection[newRow][newCol] = oldByteByTableModulo
           }
           
         }
         
       }
-      console.log(zeros)
+      return newCollection
     },
-    toggleBaseRadioButton() {
-      console.log(this)
+
+    addErrorToBases() {
+      this.$store.dispatch("resetTableDataWithError")
+      
+      let correctByte =
+        this.convert.toBin(
+          this.convert.fromHexToDec(
+            this.tableValue(this.erroneousBasis)
+          )
+        ) 
+      let errorByte =
+      this.display.addHexPrefix(
+        this.convert.toHex(
+          this.convert.fromBinToDec(
+            this.calculation.addError(correctByte, this.erroneousBit) 
+          )
+        )
+      )
+      this.$store.dispatch("setTableDataWithError", {data: errorByte, tableId: this.erroneousBasis })
+      this.openErrorInfo = true
     },
+
     newTableData(collection, tableId) {
       if (tableId == "S1") {
-          return _.map(collection, 
-            (line) => { 
-              return _.map(line, 
-                (el) => {
-                  return this.convert.fromBinToDec(this.calculation.binaryByDegrees(this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.convert.toBin(el)), this.firstFourthDegreePolynomial)))
-                }
-              )
-            }
-          )
+          return this.generateInfoTable(this.standartTable, this.firstFourthDegreePolynomial)
       } else if (tableId == "S2") {
-          return _.map(collection, 
-            (line) => { 
-              return _.map(line, 
-                (el) => {
-                  return this.convert.fromBinToDec(this.calculation.binaryByDegrees(this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.convert.toBin(el)), this.secondFourthDegreePolynomial)))
-                }
-              )
-            }
-          )
+          return this.generateInfoTable(this.standartTable, this.secondFourthDegreePolynomial)
       } else if (tableId == "S1*") {
           let newCollection = []
           for (let i = 0; i < collection[0].length; i++) {
@@ -348,6 +388,7 @@ export default {
           return newCollection
       } else return collection
     },
+
     showPolynom() {
       if (this.inputByte && this.PSRCreplace) {
         this.$nextTick(()=> {
@@ -364,6 +405,10 @@ export default {
 
     tableValue(tableId) {
       return this.$store.getters.tableDataById(tableId);
+    },
+
+    tableValueWithError(tableId) {
+      return this.$store.getters.tableDataWithErrorById(tableId);
     },
 
     selectElement(input) {
@@ -390,6 +435,7 @@ export default {
       this.erroneousBasis = '';
       this.erroneousBit = '';
       this.$store.dispatch("resetTableData")
+      this.$store.dispatch("resetTableDataWithError")
     },
 
     inputError(inputError){
@@ -399,6 +445,30 @@ export default {
   },
 
   computed: {
+    erroneousBasisShow() {
+      if(this.erroneousBasis == "S1") {
+        return 1
+      } else if(this.erroneousBasis == "S2") {
+        return 2
+      } else if(this.erroneousBasis == "S1*") {
+        return 3
+      } else {
+        return 4
+      }
+    },
+
+    erroneousBitShow() {
+      if(this.erroneousBit == "0") {
+        return 1
+      } else if(this.erroneousBit == "1") {
+        return 2
+      } else if(this.erroneousBit == "2") {
+        return 3
+      } else {
+        return 4
+      }
+    },
+
     firstInfoTableData() {
       return this.newTableData(this.standartTable, 'S1')
     },
@@ -506,6 +576,7 @@ export default {
       p {
         text-align: start;
         font-weight: bold;
+        padding-left: 5px;
       }
 
       input:checked + label  {

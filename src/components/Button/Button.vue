@@ -35,6 +35,7 @@ export default {
   padding: 10px 20px;
   background: rgba(22, 62, 115, 0.5);
   color: white;
+  height: 37px;
   border: 1px solid transparent;
 
   &:hover {
@@ -51,6 +52,10 @@ export default {
     cursor:not-allowed
   }
 
+  &.error {
+    margin-top: 15px;
+    font-size: 14px !important;
+  }
 }
 
 </style>

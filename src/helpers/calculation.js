@@ -42,7 +42,7 @@ class Calculation {
 
   binaryByDegrees(degrees) {
     let binary = '00000000'.split('')
-    if( typeof degrees === 'string') {
+    if (typeof degrees === 'string') {
       degrees = this.getPolynomialDegrees(degrees)
     }
     for (let i = 0; i < degrees.length; i++) {
@@ -70,6 +70,16 @@ class Calculation {
     });
 
     return degrees
+  }
+
+  addError(correctByteAsBin, errorBit) {
+    let outputByteAsBin = correctByteAsBin.split('').reverse()
+    if (outputByteAsBin[Number(errorBit)] == "1") {
+      outputByteAsBin[Number(errorBit)] = "0"
+    } else {
+      outputByteAsBin[Number(errorBit)] = "1"
+    }
+    return outputByteAsBin.reverse().join('')
   }
 }
 

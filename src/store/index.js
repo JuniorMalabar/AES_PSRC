@@ -7,7 +7,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    tableData: {}
+    tableData: {},
+    tableDataWithError: {}
   },
 
   getters: {
@@ -17,7 +18,15 @@ export default new Vuex.Store({
 
     tableDataById: state => tableId => {
       return _.get(state.tableData, tableId);
-    }
+    },
+
+    tableDataWithError: state => {
+      return state.tableDataWithError;
+    },
+
+    tableDataWithErrorById: state => tableId => {
+      return _.get(state.tableDataWithError, tableId);
+    },
   },
 
   mutations: {
@@ -26,6 +35,15 @@ export default new Vuex.Store({
     },
     resetTableData(state) {
       state.tableData = {};
+    },
+    setTableDataWithError(state, { data, tableId }) {
+      Vue.set(state.tableDataWithError, tableId, data);
+    },
+    resetTableDataWithError(state) {
+      state.tableDataWithError = {};
+      for (const [key, value] of Object.entries(state.tableData)) {
+        Vue.set(state.tableDataWithError, key, value);
+      }
     }
   },
 
@@ -35,6 +53,12 @@ export default new Vuex.Store({
     },
     resetTableData({ commit }) {
       commit("resetTableData");
+    },
+    setTableDataWithError({ commit }, { data, tableId }) {
+      commit("setTableDataWithError", { data, tableId });
+    },
+    resetTableDataWithError({ commit }) {
+      commit("resetTableDataWithError");
     }
   }
 })

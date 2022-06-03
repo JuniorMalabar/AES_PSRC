@@ -34,6 +34,7 @@ export default {
       handler(value) {
         if(value) {
           this.$store.dispatch("setTableData", {data: this.num, tableId: this.tableId })
+          this.$store.dispatch("setTableDataWithError", {data: this.num, tableId: this.tableId })
         }
       }
     }
