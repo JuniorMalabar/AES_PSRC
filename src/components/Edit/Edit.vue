@@ -18,7 +18,6 @@
 </template>
 
 <script>
-  import Convert from '../../helpers/convert';
   import Validate from '../../helpers/validate';
   import Button from '../Button/Button.vue';
 
@@ -37,8 +36,6 @@
     data() {
       return {
         inputByte: "",
-        convert: null,
-        validate: null,
         error: false
       }
     },
@@ -49,7 +46,7 @@
     },
     watch: {
       inputByte(val) {
-        this.error = this.validate.allowedLen(val)
+        this.error = Validate.allowedLen(val)
       },
       error(val) {
         this.$emit("input-error", val)
@@ -57,10 +54,6 @@
       errorOnTop(val) {
         this.error = val
       }
-    },
-    mounted() {
-      this.convert = new Convert();
-      this.validate = new Validate();
     }
 }
 </script>

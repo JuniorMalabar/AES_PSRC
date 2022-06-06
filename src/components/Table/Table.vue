@@ -13,7 +13,7 @@
         <td v-for="(byte,colIndex) in line" :key="colIndex">
           <Square :rowIndex="rowIndex" :colIndex="colIndex" :tableId="tableId"
           :pathToOutputByte="rowIndex == selectedElementRowIndex || colIndex == selectedElementColIndex" 
-          :outputByte="rowIndex == selectedElementRowIndex && colIndex == selectedElementColIndex" :num="display.addHexPrefix(convert.toHex(byte))"/>
+          :outputByte="rowIndex == selectedElementRowIndex && colIndex == selectedElementColIndex" :num="displayByte(byte)"/>
         </td>
       </tr>
     </tbody>
@@ -56,21 +56,25 @@ export default {
 
     data() {
         return {
-            header: new Display().tableHeader(),
-            display: new Display(),
-            convert: new Convert()
+            header: Display.tableHeader(),
         }
     },
 
     mounted() {
         let tableCaption = this.$refs["table-caption" + this.tableId];
         if(this.modulo){
-            tableCaption.innerHTML= "Основание " + this.display.indexesToTop(this.modulo)
+            tableCaption.innerHTML= "Основание " + Display.indexesToTop(this.modulo)
         } else if (this.type == "standart") {
             tableCaption.innerHTML = "Таблица замен стандарта AES";
         } else if (this.type == "control") {
             tableCaption.innerHTML = "Контрольная таблица";
         } 
+    },
+
+    methods: {
+      displayByte(byte) {
+        return Display.addHexPrefix(Convert.toHex(byte))
+      }
     }
 }
 </script>

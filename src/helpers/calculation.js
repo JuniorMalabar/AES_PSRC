@@ -1,8 +1,9 @@
 import _ from 'lodash'
+import Convert from './convert';
 
 class Calculation {
 
-  multiplicationOnX(polynom) {
+  static multiplicationOnX(polynom) {
     return _.chain(polynom).replace(/\d/g,
       (match) => {
         if (match == "1") {
@@ -16,7 +17,7 @@ class Calculation {
         }).value();
   }
 
-  remainderAfterDividingAPolynomialByAPolynomial(polynom_1, polynom_2) {
+  static remainderAfterDividingAPolynomialByAPolynomial(polynom_1, polynom_2) {
 
     if (polynom_1 == polynom_2) {
       return [0];
@@ -40,7 +41,7 @@ class Calculation {
     return degrees_1;
   }
 
-  binaryByDegrees(degrees) {
+  static binaryByDegrees(degrees) {
     let binary = '00000000'.split('')
     if (typeof degrees === 'string') {
       degrees = this.getPolynomialDegrees(degrees)
@@ -51,12 +52,12 @@ class Calculation {
     return binary.reverse().join('')
   }
 
-  moduloAddition(firstDeg, secondDeg) {
+  static moduloAddition(firstDeg, secondDeg) {
     return Array.from(new Set(_.concat(_.difference(firstDeg, secondDeg),
       _.difference(secondDeg, firstDeg)))).sort().reverse()
   }
 
-  getPolynomialDegrees(polynom) {
+  static getPolynomialDegrees(polynom) {
     let degrees = [];
 
     polynom.split("+").forEach((el) => {
@@ -72,7 +73,7 @@ class Calculation {
     return degrees
   }
 
-  addError(correctByteAsBin, errorBit) {
+  static addError(correctByteAsBin, errorBit) {
     let outputByteAsBin = correctByteAsBin.split('').reverse()
     if (outputByteAsBin[Number(errorBit)] == "1") {
       outputByteAsBin[Number(errorBit)] = "0"
@@ -80,6 +81,98 @@ class Calculation {
       outputByteAsBin[Number(errorBit)] = "1"
     }
     return outputByteAsBin.reverse().join('')
+  }
+  //firstInfoByte, secondInfoByte
+  static getFirstControlByte(firstInfoByte, secondInfoByte) {
+
+    let fromFirst = this.getPolynomialDegrees(
+      Convert.binaryToPolynom(
+        Convert.toBin(
+          firstInfoByte
+        )
+      )
+    )
+    let fromSecond = this.getPolynomialDegrees(
+      Convert.binaryToPolynom(
+        Convert.toBin(
+          secondInfoByte
+        )
+      )
+    )
+
+    let hexFirstControlByte = Convert.toHex(
+      Convert.fromBinToDec(
+        this.binaryByDegrees(
+          this.moduloAddition(fromFirst, fromSecond)
+        )
+      )
+    )
+
+    return hexFirstControlByte
+  }
+
+  static getSecondControlByte(firstInfoByte, secondInfoByte, modulo) {
+    let fromFirst = this.getPolynomialDegrees(
+      Convert.binaryToPolynom(
+        Convert.toBin(
+          firstInfoByte
+        )
+      )
+    )
+
+    let fromSecond = this.getPolynomialDegrees(
+      this.multiplicationOnX(
+        Convert.binaryToPolynom(
+          Convert.toBin(
+            secondInfoByte
+          )
+        )
+      )
+    )
+
+    let hexSecondControlByte = Convert.toHex(
+      Convert.fromBinToDec(
+        this.binaryByDegrees(
+          this.remainderAfterDividingAPolynomialByAPolynomial(
+            Convert.binaryToPolynom(
+              this.binaryByDegrees(
+                this.moduloAddition(fromFirst, fromSecond)
+              )
+            ),
+            modulo
+          )
+        )
+      )
+    )
+
+    return hexSecondControlByte
+  }
+
+  static getNewRowColFromStandartRow(rowCol, polynom) {
+    return Convert.fromBinToDec(
+      this.binaryByDegrees(
+        this.remainderAfterDividingAPolynomialByAPolynomial(
+          Convert.binaryToPolynom(
+            Convert.toBin(
+              Convert.fromHexToDec(rowCol)
+            )
+          ), polynom
+        )
+      )
+    )
+  }
+
+  static getNewByteByTablePolynom(oldByte, tablePolynom) {
+    return Convert.fromBinToDec(
+      this.binaryByDegrees(
+        this.remainderAfterDividingAPolynomialByAPolynomial(
+          Convert.binaryToPolynom(
+            Convert.toBin(oldByte)
+          ),
+          tablePolynom
+        )
+      )
+    )
   }
 }
 

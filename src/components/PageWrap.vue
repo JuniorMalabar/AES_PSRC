@@ -10,7 +10,7 @@
     <div class="initial-data" v-if="inputByte && !error">
       <div @click="reset" class="reset">×</div>
       <p>
-        Входной байт: {{ convert.toHex(inputByte) }}
+        Входной байт: {{ hexInputByte }}
       </p>
       <p>
         В двоичной форме: {{ binaryInputByte }}
@@ -22,12 +22,12 @@
       <div v-if="AESreplace">
         <p>
           Левая часть входного байта 
-          ({{ display.addHexPrefix(leftPartOfInputByte) }}) 
+          ({{ leftPartOfInputByte }}) 
           определяет номер строки
         </p>
         <p>
           Правая часть входного байта 
-          ({{ display.addHexPrefix(rightPartOfInputByte) }})
+          ({{ rightPartOfInputByte }})
           определяет номер столбца
         </p>
         <p>
@@ -131,8 +131,8 @@
       :type="tableTypes[0]"
       :bytes="standartTable"
       :tableId="'S'"
-      :selectedElementRowIndex="convert.fromHexToDec(leftPartOfInputByte)"
-      :selectedElementColIndex="convert.fromHexToDec(rightPartOfInputByte)"
+      :selectedElementRowIndex="decLeftPartOfInputByte"
+      :selectedElementColIndex="decRightPartOfInputByte"
     />
     
     <div v-if="inputByte && PSRCreplace" class="tables-wrapper">
@@ -141,8 +141,8 @@
           :type="tableTypes[1]"
           :bytes="firstInfoTableData"
           :tableId="'S1'"
-          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
-          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
+          :selectedElementRowIndex="firstRemainderToTable"
+          :selectedElementColIndex="secondRemainderToTable"
           :modulo="firstFourthDegreePolynomial"
         />
 
@@ -150,8 +150,8 @@
           :type="tableTypes[1]"
           :bytes="secondInfoTableData"
           :tableId="'S2'"
-          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
-          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
+          :selectedElementRowIndex="firstRemainderToTable"
+          :selectedElementColIndex="secondRemainderToTable"
           :modulo="secondFourthDegreePolynomial"
         />
       </div>
@@ -161,16 +161,16 @@
           :type="tableTypes[2]"
           :bytes="firstControlTableData"
           :tableId="'S1*'"
-          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
-          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
+          :selectedElementRowIndex="firstRemainderToTable"
+          :selectedElementColIndex="secondRemainderToTable"
         />
 
         <Table
           :type="tableTypes[2]"
           :bytes="secondControlTableData"
           :tableId="'S2*'"
-          :selectedElementRowIndex="convert.fromBinToDec(convert.polynomToBinary(firstRemainder))"
-          :selectedElementColIndex="convert.fromBinToDec(convert.polynomToBinary(secondRemainder))"
+          :selectedElementRowIndex="firstRemainderToTable"
+          :selectedElementColIndex="secondRemainderToTable"
         />
       </div>
     </div>
@@ -198,6 +198,7 @@ export default {
       standartTable: null,
       tableTypes: ["standart", "information", "control"],
       inputByte: null,
+      hexInputByte: null,
       error: false,
       AESreplace: false,
       PSRCreplace: false,
@@ -207,7 +208,10 @@ export default {
       firstFourthDegreePolynomial: "x4+x+1",
       secondFourthDegreePolynomial: "x4+x3+1",
       thirdFourthDegreePolynomial: "x4+x3+x2+x+1",
-      openErrorInfo: false
+      openErrorInfo: false,
+      convert: null,
+      display: null,
+      calculation: null
     }
   },
 
@@ -235,44 +239,15 @@ export default {
       let newCollection = new Standart().ZEROS_TABLE();
       for (let row = 0; row < collection.length; row++) {
         for (let col = 0; col < collection.length; col++) {
-          let rowInd = this.convert.toHexWithoutZeros(row)
-          let colInd = this.convert.toHexWithoutZeros(col)
-          let oldByteByTableModulo =
-          this.convert.fromBinToDec(
-            this.calculation.binaryByDegrees(
-              this.calculation.remainderAfterDividingAPolynomialByAPolynomial(
-                this.convert.binaryToPolynom(
-                  this.convert.toBin(collection[row][col])
-                ), 
-                tablePolynom
-              )
-            )
-          )
-          console.log(oldByteByTableModulo)
+          let rowInd = Convert.toHexWithoutZeros(row)
+          let colInd = Convert.toHexWithoutZeros(col)
+          let oldByteByTableModulo = Calculation.getNewByteByTablePolynom(collection[row][col], tablePolynom)
+          
           let rowCol = rowInd + colInd
           
-          let newRow = this.convert.fromBinToDec(
-            this.calculation.binaryByDegrees(
-              this.calculation.remainderAfterDividingAPolynomialByAPolynomial(
-                this.convert.binaryToPolynom(
-                  this.convert.toBin(
-                    this.convert.fromHexToDec(rowCol)
-                  )
-                ), this.firstFourthDegreePolynomial
-              )
-            )
-          )
-          let newCol = this.convert.fromBinToDec(
-            this.calculation.binaryByDegrees(
-              this.calculation.remainderAfterDividingAPolynomialByAPolynomial(
-                this.convert.binaryToPolynom(
-                  this.convert.toBin(
-                    this.convert.fromHexToDec(rowCol)
-                  )
-                ), this.secondFourthDegreePolynomial
-              )
-            )
-          )
+          let newRow = Calculation.getNewRowColFromStandartRow(rowCol, this.firstFourthDegreePolynomial)
+          let newCol = Calculation.getNewRowColFromStandartRow(rowCol, this.secondFourthDegreePolynomial)
+          
           if(newRow == 10 && newCol == 1 && newCollection[newRow][newCol] != '0x00') {
             newCollection[newRow][newCol-1] = oldByteByTableModulo
           } else if (newRow == 1 && newCol == 10  && newCollection[newRow][newCol] != '0x00') {
@@ -291,16 +266,16 @@ export default {
       this.$store.dispatch("resetTableDataWithError")
       
       let correctByte =
-        this.convert.toBin(
-          this.convert.fromHexToDec(
+        Convert.toBin(
+          Convert.fromHexToDec(
             this.tableValue(this.erroneousBasis)
           )
         ) 
       let errorByte =
-      this.display.addHexPrefix(
-        this.convert.toHex(
-          this.convert.fromBinToDec(
-            this.calculation.addError(correctByte, this.erroneousBit) 
+      Display.addHexPrefix(
+        Convert.toHex(
+          Convert.fromBinToDec(
+            Calculation.addError(correctByte, this.erroneousBit) 
           )
         )
       )
@@ -318,29 +293,7 @@ export default {
           for (let i = 0; i < collection[0].length; i++) {
             let line = []
             for (let j = 0; j < collection[1].length; j++) {
-              let fromFirst = this.calculation.getPolynomialDegrees(
-                this.convert.binaryToPolynom(
-                  this.convert.toBin(
-                    collection[0][i][j]
-                  )
-                )
-              )
-              let fromSecond = this.calculation.getPolynomialDegrees(
-                this.convert.binaryToPolynom(
-                  this.convert.toBin(
-                    collection[1][i][j]
-                  )
-                )
-              )
-              line.push(
-                this.convert.toHex(
-                  this.convert.fromBinToDec(
-                    this.calculation.binaryByDegrees(
-                      this.calculation.moduloAddition(fromFirst, fromSecond)
-                    )
-                  )
-                ) 
-              )
+              line.push( Calculation.getFirstControlByte(collection[0][i][j],collection[1][i][j]))
             }
             newCollection.push(line)
           }
@@ -350,38 +303,7 @@ export default {
           for (let i = 0; i < collection[0].length; i++) {
             let line = []
             for (let j = 0; j < collection[1].length; j++) {
-              let fromFirst = this.calculation.getPolynomialDegrees(
-                this.convert.binaryToPolynom(
-                  this.convert.toBin(
-                    collection[0][i][j]
-                  )
-                )
-              )
-              let fromSecond = this.calculation.getPolynomialDegrees(
-                this.calculation.multiplicationOnX(
-                  this.convert.binaryToPolynom(
-                    this.convert.toBin(
-                      collection[1][i][j]
-                    )
-                  )
-                )
-              )
-              line.push(
-                this.convert.toHex(
-                  this.convert.fromBinToDec(
-                    this.calculation.binaryByDegrees(
-                      this.calculation.remainderAfterDividingAPolynomialByAPolynomial(  
-                        this.convert.binaryToPolynom(
-                          this.calculation.binaryByDegrees(
-                            this.calculation.moduloAddition(fromFirst, fromSecond)
-                          )
-                        ),
-                        "x4+x3+x2+x+1"
-                      )
-                    )
-                  )
-                )
-              )  
+              line.push(Calculation.getSecondControlByte(collection[0][i][j],collection[1][i][j], this.thirdFourthDegreePolynomial))
             }
             newCollection.push(line)
           }
@@ -393,12 +315,12 @@ export default {
       if (this.inputByte && this.PSRCreplace) {
         this.$nextTick(()=> {
           this.$refs["input-polynom"].innerHTML = this.polynomInputByte;
-          this.$refs["first-polynom"].innerHTML = this.display.indexesToTop(this.firstFourthDegreePolynomial);  
-          this.$refs["first-remainder"].innerHTML = this.display.indexesToTop(this.firstRemainder);  
-          this.$refs["PSRC-first-remainder"].innerHTML = this.display.indexesToTop(this.firstRemainder);  
-          this.$refs["second-polynom"].innerHTML = this.display.indexesToTop(this.secondFourthDegreePolynomial);  
-          this.$refs["second-remainder"].innerHTML = this.display.indexesToTop(this.secondRemainder);  
-          this.$refs["PSRC-second-remainder"].innerHTML = this.display.indexesToTop(this.secondRemainder);  
+          this.$refs["first-polynom"].innerHTML = Display.indexesToTop(this.firstFourthDegreePolynomial);  
+          this.$refs["first-remainder"].innerHTML = Display.indexesToTop(this.firstRemainder);  
+          this.$refs["PSRC-first-remainder"].innerHTML = Display.indexesToTop(this.firstRemainder);  
+          this.$refs["second-polynom"].innerHTML = Display.indexesToTop(this.secondFourthDegreePolynomial);  
+          this.$refs["second-remainder"].innerHTML = Display.indexesToTop(this.secondRemainder);  
+          this.$refs["PSRC-second-remainder"].innerHTML = Display.indexesToTop(this.secondRemainder);  
         })
       } 
     },
@@ -412,14 +334,17 @@ export default {
     },
 
     selectElement(input) {
-      let check = Number(this.display.addHexPrefix(input))
+      let check = Number(Display.addHexPrefix(input))
       if (isNaN(check)) {
         this.error = true;
         this.inputByte = null;
+        this.hexInputByte = null
       } else if (check == 0){
-        this.inputByte = "0"  
+        this.inputByte = "0"
+        this.hexInputByte = "0x00" 
       } else {
         this.inputByte =  check;
+        this.hexInputByte = Convert.toHex(this.inputByte)
       }
       if (this.PSRCreplace || this.AESreplace) {
         this.showPolynom();
@@ -445,6 +370,7 @@ export default {
   },
 
   computed: {
+    
     erroneousBasisShow() {
       if(this.erroneousBasis == "S1") {
         return 1
@@ -486,29 +412,45 @@ export default {
     },
 
     binaryInputByte() {
-      return this.convert.toBin(this.inputByte);
+      return Convert.toBin(this.inputByte);
     },
 
     polynomInputByte() {
-      return this.display.indexesToTop(this.convert.binaryToPolynom(this.binaryInputByte));
+      return Display.indexesToTop(Convert.binaryToPolynom(this.binaryInputByte));
     },
 
     leftPartOfInputByte() {
-      return this.convert.toHex(this.inputByte).slice(0,1);
+      return Convert.toHex(this.inputByte).slice(0,1);
+    },
+
+    decLeftPartOfInputByte() {
+      return Convert.fromHexToDec(this.leftPartOfInputByte)
     },
     
     rightPartOfInputByte() {
-      return this.convert.toHex(this.inputByte).slice(1,2);
+      return Convert.toHex(this.inputByte).slice(1,2);
+    },
+
+    decRightPartOfInputByte() {
+      return Convert.fromHexToDec(this.rightPartOfInputByte)
     },
 
     firstRemainder() {
-      let res = this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.binaryInputByte), this.firstFourthDegreePolynomial)
-      return this.convert.binaryToPolynom(this.calculation.binaryByDegrees(res))
+      let res = Calculation.remainderAfterDividingAPolynomialByAPolynomial(Convert.binaryToPolynom(this.binaryInputByte), this.firstFourthDegreePolynomial)
+      return Convert.binaryToPolynom(Calculation.binaryByDegrees(res))
+    },
+
+    firstRemainderToTable() {
+      return Convert.fromBinToDec(Convert.polynomToBinary(this.firstRemainder))
     },
 
     secondRemainder() {
-      let res = this.calculation.remainderAfterDividingAPolynomialByAPolynomial(this.convert.binaryToPolynom(this.binaryInputByte), this.secondFourthDegreePolynomial) 
-      return this.convert.binaryToPolynom(this.calculation.binaryByDegrees(res))
+      let res = Calculation.remainderAfterDividingAPolynomialByAPolynomial(Convert.binaryToPolynom(this.binaryInputByte), this.secondFourthDegreePolynomial) 
+      return Convert.binaryToPolynom(Calculation.binaryByDegrees(res))
+    },
+
+    secondRemainderToTable() {
+      return Convert.fromBinToDec(Convert.polynomToBinary(this.secondRemainder))
     }
   }
 }

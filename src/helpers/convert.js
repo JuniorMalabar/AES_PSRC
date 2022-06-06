@@ -1,12 +1,12 @@
 
 class Convert {
 
-  toHexWithoutZeros(num) {
+  static toHexWithoutZeros(num) {
     num = num.toString(16)
     return num
   }
 
-  toHex(num) {
+  static toHex(num) {
     num = num.toString(16)
     if (num.length < 2) {
       num = '0' + num
@@ -14,7 +14,7 @@ class Convert {
     return num.toUpperCase();
   }
 
-  toBin(num) {
+  static toBin(num) {
     num = num.toString(2)
     while (num.length < 8) {
       num = '0' + num
@@ -22,15 +22,15 @@ class Convert {
     return num;
   }
 
-  fromBinToDec(str) {
+  static fromBinToDec(str) {
     return parseInt(str, 2)
   }
 
-  fromHexToDec(str) {
+  static fromHexToDec(str) {
     return parseInt(str, 16)
   }
 
-  binaryToPolynom(string) {
+  static binaryToPolynom(string) {
     let polynom = [];
     for (let i = 0; i < string.length; i++) {
       if (string[i] == 1) {
@@ -50,7 +50,7 @@ class Convert {
     }
   }
 
-  polynomToBinary(polynom) {
+  static polynomToBinary(polynom) {
     let binary = '00000000'.split('')
     let degrees = []
     polynom.split('+').forEach(el => {
