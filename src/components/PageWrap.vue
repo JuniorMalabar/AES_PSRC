@@ -6,7 +6,7 @@
       :message="'Введите значение входного байта в шестнадцатеричной системе счисления'"
       :errorOnTop="error"
     />
-
+    
     <div class="initial-data" v-if="inputByte && !error">
       <div @click="reset" class="reset">×</div>
       <p>
@@ -141,42 +141,71 @@
     
     <div v-if="inputByte && PSRCreplace" class="tables-wrapper">
       <div class="info-tables-wrapper">
-        <Table
-          :type="tableTypes[1]"
-          :bytes="firstInfoTableData"
-          :tableId="'S1'"
-          :selectedElementRowIndex="firstRemainderToTable"
-          :selectedElementColIndex="secondRemainderToTable"
-          :modulo="firstFourthDegreePolynomial"
-        />
+        <vsa-list>
+          <vsa-item>
+            <vsa-heading>
+              Первая информационная таблица
+            </vsa-heading>
 
-        <Table
-          :type="tableTypes[1]"
-          :bytes="secondInfoTableData"
-          :tableId="'S2'"
-          :selectedElementRowIndex="firstRemainderToTable"
-          :selectedElementColIndex="secondRemainderToTable"
-          :modulo="secondFourthDegreePolynomial"
-        />
-      </div>
-      
-      <div class="control-tables-wrapper">
-        <Table
-          :type="tableTypes[2]"
-          :bytes="firstControlTableData"
-          :tableId="'S1*'"
-          :selectedElementRowIndex="firstRemainderToTable"
-          :selectedElementColIndex="secondRemainderToTable"
-        />
+            <vsa-content>
+              <Table
+                :type="tableTypes[1]"
+                :bytes="firstInfoTableData"
+                :tableId="'S1'"
+                :selectedElementRowIndex="firstRemainderToTable"
+                :selectedElementColIndex="secondRemainderToTable"
+                :modulo="firstFourthDegreePolynomial"
+              />
+            </vsa-content>
+          </vsa-item>
+          <vsa-item>
+            <vsa-heading>
+              Вторая информационная таблица
+            </vsa-heading>
 
-        <Table
-          :type="tableTypes[2]"
-          :bytes="secondControlTableData"
-          :tableId="'S2*'"
-          :selectedElementRowIndex="firstRemainderToTable"
-          :selectedElementColIndex="secondRemainderToTable"
-        />
-      </div>
+            <vsa-content>
+              <Table
+                :type="tableTypes[1]"
+                :bytes="secondInfoTableData"
+                :tableId="'S2'"
+                :selectedElementRowIndex="firstRemainderToTable"
+                :selectedElementColIndex="secondRemainderToTable"
+                :modulo="secondFourthDegreePolynomial"
+              />
+            </vsa-content>
+          </vsa-item>
+          <vsa-item>
+            <vsa-heading>
+              Первая контрольная таблица
+            </vsa-heading>
+
+            <vsa-content>
+              <Table
+                :type="tableTypes[2]"
+                :bytes="firstControlTableData"
+                :tableId="'S1*'"
+                :selectedElementRowIndex="firstRemainderToTable"
+                :selectedElementColIndex="secondRemainderToTable"
+              />
+            </vsa-content>
+          </vsa-item>
+          <vsa-item>
+            <vsa-heading>
+              Вторая контрольная таблица
+            </vsa-heading>
+
+            <vsa-content>
+              <Table
+                :type="tableTypes[2]"
+                :bytes="secondControlTableData"
+                :tableId="'S2*'"
+                :selectedElementRowIndex="firstRemainderToTable"
+                :selectedElementColIndex="secondRemainderToTable"
+              />
+            </vsa-content>
+          </vsa-item>
+        </vsa-list>
+      </div>  
     </div>
     
   </div>
@@ -189,12 +218,22 @@ import Edit from './Edit/Edit.vue';
 import Convert from '../helpers/convert';
 import Display from '../helpers/display';
 import Calculation from '../helpers/calculation';
-
+import {
+  VsaList,
+  VsaItem,
+  VsaHeading,
+  VsaContent,
+} from 'vue-simple-accordion';
+import 'vue-simple-accordion/dist/vue-simple-accordion.css';
 export default {
 
   components: {
     Table,
-    Edit
+    Edit,
+    VsaList,
+    VsaItem,
+    VsaHeading,
+    VsaContent,
   },
 
   data: function () {
@@ -295,7 +334,7 @@ export default {
           data: Display.addHexPrefix(Calculation.getSecondControlByte(errorByte, this.$store.getters.tableDataById("S2"), this.thirdFourthDegreePolynomial)), 
           tableId: "S2*" 
         })
-      } else {
+      } else if (this.erroneousBasis == 2) {
         this.$store.dispatch("setTableDataWithError", 
         {
           data: Display.addHexPrefix(Calculation.getFirstControlByte(this.$store.getters.tableDataById("S1"), errorByte)), 
@@ -493,7 +532,24 @@ export default {
 </script>
 
 
-<style lang="scss" scoped>
+<style lang="scss" >
+  .vsa-item__trigger{
+    background: rgba(22, 62, 115, 0.5);
+    color: white;
+    &:hover {
+      cursor: pointer;
+      background: rgba(22, 62, 115, 0.8);
+    }
+    &:active {
+      background: rgba(22, 62, 115, 1);
+    }
+  }
+  
+  span.vsa-item__trigger__content {
+    font-size: 24px;
+    font-weight: normal;
+  } 
+  
   .main-wrap {
     display: flex;
     justify-content: start;

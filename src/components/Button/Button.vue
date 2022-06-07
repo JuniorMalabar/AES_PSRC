@@ -37,6 +37,10 @@ export default {
   color: white;
   height: 37px;
   border: 1px solid transparent;
+  display: flex;
+  justify-content: center;
+  font-size: 16px !important;
+  align-items: center;
 
   &:hover {
     cursor: pointer;
@@ -54,7 +58,10 @@ export default {
 
   &.error {
     margin-top: 15px;
-    font-size: 14px !important;
+
+    &:nth-child(2) {
+      margin-left: 10px;
+    }
   }
 }
 

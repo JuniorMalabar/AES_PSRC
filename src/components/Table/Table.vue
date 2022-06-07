@@ -79,7 +79,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+    
     table {
         width: fit-content;
         margin-bottom: 10px;
