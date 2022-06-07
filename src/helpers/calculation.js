@@ -4,6 +4,9 @@ import Convert from './convert';
 class Calculation {
 
   static multiplicationOnX(polynom) {
+    if(polynom=="0") {
+      return "0"
+    }
     return _.chain(polynom).replace(/\d/g,
       (match) => {
         if (match == "1") {
@@ -53,13 +56,24 @@ class Calculation {
   }
 
   static moduloAddition(firstDeg, secondDeg) {
+    if(firstDeg == []) {
+      return secondDeg
+    }
+    if(secondDeg == []) {
+      return firstDeg
+    }
+    if(firstDeg == 0 && secondDeg == 0) {
+      return '0'
+    }
     return Array.from(new Set(_.concat(_.difference(firstDeg, secondDeg),
       _.difference(secondDeg, firstDeg)))).sort().reverse()
   }
 
   static getPolynomialDegrees(polynom) {
     let degrees = [];
-
+    if (polynom == "0") {
+      return degrees
+    }
     polynom.split("+").forEach((el) => {
       if (el == "x") {
         degrees.push(1);
@@ -172,6 +186,15 @@ class Calculation {
         )
       )
     )
+  }
+
+  static errorSyndrome(firstControlByte, secondControlByte) {
+    let errorSyndrome = 
+    Convert.binaryToPolynom(this.binaryByDegrees(this.moduloAddition(
+      this.getPolynomialDegrees(Convert.binaryToPolynom(Convert.toBin(Convert.fromHexToDec(firstControlByte)))),
+      this.getPolynomialDegrees(Convert.binaryToPolynom(Convert.toBin(Convert.fromHexToDec(secondControlByte))))
+    )))
+    return errorSyndrome
   }
 }
 

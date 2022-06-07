@@ -81,7 +81,6 @@
             </p>
             <enhanced-check-radio 
                       :label="['Первое основание', 'Второе основание', 'Третье основание', 'Четвёртое основание']"
-                      
                       v-model="erroneousBasis"
                       :rounded="true" id="enhancedCheckRadio" 
                       :value="['S1', 'S2', 'S1*', 'S2*']"/>
@@ -92,7 +91,6 @@
             </p>
             <enhanced-check-radio 
                       :label="['Первый разряд', 'Второй разряд', 'Третий разряд', 'Четвёртый разряд']"
-                      
                       v-model="erroneousBit"
                       :rounded="true" id="enhancedCheckRadio1" 
                       :value="['0', '1', '2', '3']"/>
@@ -119,7 +117,11 @@
           <p>
             Выходной байт второй контрольной таблицы: <b>{{tableValueWithError('S2*')}}</b>
           </p>
+          <p>
+            Вычислим синдром ошибки Δ, сложив соответствующие значения контрольных байтов:
+          </p>
         </div>
+        
       </div>
     </div>
     <Table
@@ -144,8 +146,8 @@
                 :type="tableTypes[1]"
                 :bytes="firstInfoTableData"
                 :tableId="'S1'"
-                :selectedElementRowIndex="firstRemainderToTable"
-                :selectedElementColIndex="secondRemainderToTable"
+                :selectedElementRowIndex="newRow"
+                :selectedElementColIndex="newCol"
                 :modulo="firstFourthDegreePolynomial"
               />
             </vsa-content>
@@ -160,8 +162,8 @@
                 :type="tableTypes[1]"
                 :bytes="secondInfoTableData"
                 :tableId="'S2'"
-                :selectedElementRowIndex="firstRemainderToTable"
-                :selectedElementColIndex="secondRemainderToTable"
+                :selectedElementRowIndex="newRow"
+                :selectedElementColIndex="newCol"
                 :modulo="secondFourthDegreePolynomial"
               />
             </vsa-content>
@@ -176,8 +178,8 @@
                 :type="tableTypes[2]"
                 :bytes="firstControlTableData"
                 :tableId="'S1*'"
-                :selectedElementRowIndex="firstRemainderToTable"
-                :selectedElementColIndex="secondRemainderToTable"
+                :selectedElementRowIndex="newRow"
+                :selectedElementColIndex="newCol"
               />
             </vsa-content>
           </vsa-item>
@@ -191,8 +193,8 @@
                 :type="tableTypes[2]"
                 :bytes="secondControlTableData"
                 :tableId="'S2*'"
-                :selectedElementRowIndex="firstRemainderToTable"
-                :selectedElementColIndex="secondRemainderToTable"
+                :selectedElementRowIndex="newRow"
+                :selectedElementColIndex="newCol"
               />
             </vsa-content>
           </vsa-item>
@@ -243,17 +245,12 @@ export default {
       secondFourthDegreePolynomial: "x4+x3+1",
       thirdFourthDegreePolynomial: "x4+x3+x2+x+1",
       openErrorInfo: false,
-      convert: null,
-      display: null,
-      calculation: null
     }
   },
 
   mounted() {
-    this.standartTable = new Standart().STANDART_TABLE();
-    this.convert = new Convert(),
-    this.display = new Display(),
-    this.calculation = new Calculation()
+    this.standartTable = Standart.STANDART_TABLE();
+    console.log(Calculation.binaryByDegrees([]))
   },
 
   watch: {
@@ -277,7 +274,7 @@ export default {
 
   methods: {
     generateInfoTable(collection, tablePolynom) {
-      let newCollection = new Standart().ZEROS_TABLE();
+      let newCollection = Standart.ZEROS_TABLE();
       for (let row = 0; row < collection.length; row++) {
         for (let col = 0; col < collection.length; col++) {
           let rowInd = Convert.toHexWithoutZeros(row)
@@ -466,6 +463,16 @@ export default {
       } else {
         return 4
       }
+    },
+
+    newRow() {
+      let rowCol = this.leftPartOfInputByte+this.rightPartOfInputByte
+      return Calculation.getNewRowColFromStandartRow(rowCol, this.firstFourthDegreePolynomial)
+    },
+
+    newCol() {
+      let rowCol = this.leftPartOfInputByte+this.rightPartOfInputByte
+      return Calculation.getNewRowColFromStandartRow(rowCol, this.secondFourthDegreePolynomial)
     },
 
     firstInfoTableData() {
