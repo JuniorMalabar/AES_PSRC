@@ -82,7 +82,7 @@ class Calculation {
     }
     return outputByteAsBin.reverse().join('')
   }
-  //firstInfoByte, secondInfoByte
+
   static getFirstControlByte(firstInfoByte, secondInfoByte) {
 
     let fromFirst = this.getPolynomialDegrees(
@@ -99,7 +99,6 @@ class Calculation {
         )
       )
     )
-
     let hexFirstControlByte = Convert.toHex(
       Convert.fromBinToDec(
         this.binaryByDegrees(

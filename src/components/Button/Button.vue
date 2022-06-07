@@ -57,7 +57,7 @@ export default {
   }
 
   &.error {
-    margin-top: 15px;
+    margin: 15px 0;
 
     &:nth-child(2) {
       margin-left: 10px;

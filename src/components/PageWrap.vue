@@ -6,7 +6,6 @@
       :message="'Введите значение входного байта в шестнадцатеричной системе счисления'"
       :errorOnTop="error"
     />
-    
     <div class="initial-data" v-if="inputByte && !error">
       <div @click="reset" class="reset">×</div>
       <p>
@@ -16,8 +15,9 @@
         В двоичной форме: {{ binaryInputByte }}
       </p>
       <p>
-        <label for="aes-checkbox"><b>Замена по стандарту AES</b></label>
-        <input type="checkbox" id="aes-checkbox" v-model="AESreplace">
+        <enhanced-check :label="'Замена по стандарту AES'"
+                v-model="AESreplace"
+                id="aes-checkbox"/>
       </p>
       <div v-if="AESreplace">
         <p>
@@ -35,8 +35,9 @@
         </p>
       </div>
       <p>
-        <label for="psrc-checkbox"><b>Замена с помощью ПСКВ</b></label>
-        <input @change="showPolynom" type="checkbox" id="psrc-checkbox" v-model="PSRCreplace">
+        <enhanced-check :label="'Замена с помощью ПСКВ'"
+                v-model="PSRCreplace" 
+                id="psrc-checkbox"/>
       </p>
       <div v-if="PSRCreplace">
         <p>
@@ -68,8 +69,9 @@
         </p>
       </div>
       <p v-if="PSRCreplace">
-        <label for="error-checkbox"><b>Внести ошибку</b></label>
-        <input type="checkbox" id="error-checkbox" v-model="addError">
+        <enhanced-check :label="'Внести ошибку'"
+                v-model="addError" 
+                id="error-checkbox"/>
       </p>
       <div v-if="addError && PSRCreplace" class="choose-error-place">
         <div class="choose-wrapper">
@@ -77,36 +79,26 @@
             <p>
               Выбор основания
             </p>
-            <input type="radio" id="1Base" value="S1" v-model="erroneousBasis">
-            <label for="1Base">Первое основание</label>
-            <br>
-            <input type="radio" id="2Base" value="S2" v-model="erroneousBasis">
-            <label for="2Base">Второе основание</label>
-            <br>
-            <input type="radio" id="3Base" value="S1*" v-model="erroneousBasis">
-            <label for="4Base">Третье основание</label>
-            <br>
-            <input type="radio" id="4Base" value="S2*" v-model="erroneousBasis">
-            <label for="4Base">Четвёртое основание</label>
+            <enhanced-check-radio 
+                      :label="['Первое основание', 'Второе основание', 'Третье основание', 'Четвёртое основание']"
+                      
+                      v-model="erroneousBasis"
+                      :rounded="true" id="enhancedCheckRadio" 
+                      :value="['S1', 'S2', 'S1*', 'S2*']"/>
           </div>
           <div v-if="erroneousBasis" class="choose-bit">
             <p>
               Выбор разряда
             </p>
-            <input type="radio" id="1Bit" value="0" v-model="erroneousBit">
-            <label for="1Bit">Первый разряд</label>
-            <br>
-            <input type="radio" id="2Bit" value="1" v-model="erroneousBit">
-            <label for="2Bit">Второй разряд</label>
-            <br>
-            <input type="radio" id="3Bit" value="2" v-model="erroneousBit">
-            <label for="3Bit">Третий разряд</label>
-            <br>
-            <input type="radio" id="4Bit" value="3" v-model="erroneousBit">
-            <label for="4Bit">Четвёртый разряд</label>
+            <enhanced-check-radio 
+                      :label="['Первый разряд', 'Второй разряд', 'Третий разряд', 'Четвёртый разряд']"
+                      
+                      v-model="erroneousBit"
+                      :rounded="true" id="enhancedCheckRadio1" 
+                      :value="['0', '1', '2', '3']"/>
           </div>
         </div>
-        <span class="choose-res" v-if="erroneousBasis&&erroneousBit">Ошибка в {{ erroneousBitShow }} разряде {{ erroneousBasisShow }} основания </span>
+        <span class="choose-res" v-if="erroneousBasis&&erroneousBit">Ошибка в {{ erroneousBasisShow }} основании, {{ erroneousBitShow }} разряде  </span>
         <div class="error-buttons-wrapper">
           <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="addErrorToBases">Внести ошибку</button>
           <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="removeErrorToBases">Убрать ошибку</button>
@@ -218,13 +210,10 @@ import Edit from './Edit/Edit.vue';
 import Convert from '../helpers/convert';
 import Display from '../helpers/display';
 import Calculation from '../helpers/calculation';
-import {
-  VsaList,
-  VsaItem,
-  VsaHeading,
-  VsaContent,
-} from 'vue-simple-accordion';
+import { VsaList, VsaItem, VsaHeading, VsaContent } from 'vue-simple-accordion';
 import 'vue-simple-accordion/dist/vue-simple-accordion.css';
+import { EnhancedCheck, EnhancedCheckRadio } from 'vue-enhanced-check'
+
 export default {
 
   components: {
@@ -234,6 +223,8 @@ export default {
     VsaItem,
     VsaHeading,
     VsaContent,
+    EnhancedCheck,
+    EnhancedCheckRadio
   },
 
   data: function () {
@@ -271,6 +262,13 @@ export default {
         this.erroneousBasis = ''
         this.erroneousBit = ''
         this.openErrorInfo = false
+        return newVal
+      },
+      immediate: true
+    },
+    PSRCreplace: {
+      handler(newVal) {
+        this.showPolynom()
         return newVal
       },
       immediate: true
@@ -323,18 +321,18 @@ export default {
         )
       )
       this.$store.dispatch("setTableDataWithError", {data: errorByte, tableId: this.erroneousBasis })
-      if(this.erroneousBasis == 1) {
+      if(this.erroneousBasis == "S1") {
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getFirstControlByte(errorByte, this.$store.getters.tableDataById("S2"))), 
+          data: Display.addHexPrefix(Calculation.getFirstControlByte(Convert.fromHexToDec(errorByte), this.$store.getters.tableDataById("S2"))), 
           tableId: "S1*"
         })
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getSecondControlByte(errorByte, this.$store.getters.tableDataById("S2"), this.thirdFourthDegreePolynomial)), 
+          data: Display.addHexPrefix(Calculation.getSecondControlByte(Convert.fromHexToDec(errorByte), this.$store.getters.tableDataById("S2"), this.thirdFourthDegreePolynomial)), 
           tableId: "S2*" 
         })
-      } else if (this.erroneousBasis == 2) {
+      } else if (this.erroneousBasis == "S2") {
         this.$store.dispatch("setTableDataWithError", 
         {
           data: Display.addHexPrefix(Calculation.getFirstControlByte(this.$store.getters.tableDataById("S1"), errorByte)), 
@@ -533,6 +531,8 @@ export default {
 
 
 <style lang="scss" >
+
+  
   .vsa-item__trigger{
     background: rgba(22, 62, 115, 0.5);
     color: white;
@@ -569,6 +569,36 @@ export default {
     & * {
       font-size: 18px;
     }
+    .initial-data {
+      .enhancedCheck input[type=checkbox] + label,
+      .enhancedCheck input[type=radio] + label {
+        border: none;
+        
+        &:before {
+          background: rgba(22, 62, 115, 0.1);
+          color: rgb(22, 62, 115)
+        }
+      }
+      .enhancedCheck input[type=radio] + label:before {
+        line-height: 140%;
+        color: rgb(22, 62, 115);
+        font-size: 24px;
+      }
+
+      .enhancedCheck input[type=radio]:checked + label[data-v-3616e407]:before {
+        content: "•";
+      }
+
+      .enhancedCheck input[type=radio]:not(:checked) + label[data-v-3616e407]:hover:before {
+        content: "•";
+      }
+      
+      input[type=checkbox]:not(:checked) + label:hover,
+      input[type=radio]:not(:checked) + label:hover {
+        color: black
+      }
+    }
+    
   }
   .reset {
     text-align: end;
@@ -590,7 +620,7 @@ export default {
     display: flex;
     width: 100%;
     justify-content: space-around;
-    margin-top: 20px;
+    margin: 20px 0;
   }
 
   .initial-data {
