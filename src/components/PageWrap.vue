@@ -107,7 +107,11 @@
           </div>
         </div>
         <span class="choose-res" v-if="erroneousBasis&&erroneousBit">Ошибка в {{ erroneousBitShow }} разряде {{ erroneousBasisShow }} основания </span>
-        <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="addErrorToBases">Внести</button>
+        <div class="error-buttons-wrapper">
+          <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="addErrorToBases">Внести ошибку</button>
+          <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="removeErrorToBases">Убрать ошибку</button>
+        </div>
+        
 
         <div v-if="erroneousBasis&&erroneousBit&&openErrorInfo">
           <p>В результате воздействия ошибки получены следующие значения:</p>
@@ -280,7 +284,39 @@ export default {
         )
       )
       this.$store.dispatch("setTableDataWithError", {data: errorByte, tableId: this.erroneousBasis })
+      if(this.erroneousBasis == 1) {
+        this.$store.dispatch("setTableDataWithError", 
+        {
+          data: Display.addHexPrefix(Calculation.getFirstControlByte(errorByte, this.$store.getters.tableDataById("S2"))), 
+          tableId: "S1*"
+        })
+        this.$store.dispatch("setTableDataWithError", 
+        {
+          data: Display.addHexPrefix(Calculation.getSecondControlByte(errorByte, this.$store.getters.tableDataById("S2"), this.thirdFourthDegreePolynomial)), 
+          tableId: "S2*" 
+        })
+      } else {
+        this.$store.dispatch("setTableDataWithError", 
+        {
+          data: Display.addHexPrefix(Calculation.getFirstControlByte(this.$store.getters.tableDataById("S1"), errorByte)), 
+          tableId: "S1*"
+        })
+        this.$store.dispatch("setTableDataWithError", 
+        {
+          data: Display.addHexPrefix(Calculation.getSecondControlByte(this.$store.getters.tableDataById("S1"), errorByte, this.thirdFourthDegreePolynomial)), 
+          tableId: "S2*" 
+        })
+      }
+      
       this.openErrorInfo = true
+        
+    },
+
+    removeErrorToBases() {
+      this.erroneousBasis = '';
+      this.erroneousBit = '';
+      this.openErrorInfo = false;
+      this.$store.dispatch("resetTableDataWithError")
     },
 
     newTableData(collection, tableId) {
