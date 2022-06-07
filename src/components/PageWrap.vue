@@ -585,11 +585,11 @@ export default {
         font-size: 24px;
       }
 
-      .enhancedCheck input[type=radio]:checked + label[data-v-3616e407]:before {
+      .enhancedCheck input[type=radio]:checked + label:before {
         content: "•";
       }
 
-      .enhancedCheck input[type=radio]:not(:checked) + label[data-v-3616e407]:hover:before {
+      .enhancedCheck input[type=radio]:not(:checked) + label:hover:before {
         content: "•";
       }
       
