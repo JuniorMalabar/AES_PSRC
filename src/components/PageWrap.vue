@@ -543,12 +543,20 @@ export default {
     &:active {
       background: rgba(22, 62, 115, 1);
     }
+    &[aria-expanded = 'true'] {
+      background: rgba(22, 62, 115, 0.8);
+    }
   }
   
   span.vsa-item__trigger__content {
     font-size: 24px;
     font-weight: normal;
-  } 
+  }
+  
+  .vsa-item__trigger__icon--is-default:after, 
+  .vsa-item__trigger__icon--is-default:before {
+    background: white;
+  }
   
   .main-wrap {
     display: flex;
@@ -590,6 +598,9 @@ export default {
       margin-bottom: 20px;
       padding: 15px;
       position: relative;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
     p {
       text-align: center;
       margin: 5px 0;
@@ -620,5 +631,8 @@ export default {
     span.choose-res {
       margin-top: 10px;
     }
+  }
+  .error-buttons-wrapper {
+    display: flex;
   }
 </style>
