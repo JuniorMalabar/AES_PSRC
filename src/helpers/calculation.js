@@ -4,7 +4,7 @@ import Convert from './convert';
 class Calculation {
 
   static multiplicationOnX(polynom) {
-    if(polynom=="0") {
+    if (polynom == "0") {
       return "0"
     }
     return _.chain(polynom).replace(/\d/g,
@@ -56,14 +56,14 @@ class Calculation {
   }
 
   static moduloAddition(firstDeg, secondDeg) {
-    if(firstDeg == []) {
+    if (firstDeg == 0 && secondDeg == 0) {
+      return '0'
+    }
+    if (firstDeg == [] || firstDeg == 0) {
       return secondDeg
     }
-    if(secondDeg == []) {
+    if (secondDeg == [] || secondDeg == 0) {
       return firstDeg
-    }
-    if(firstDeg == 0 && secondDeg == 0) {
-      return '0'
     }
     return Array.from(new Set(_.concat(_.difference(firstDeg, secondDeg),
       _.difference(secondDeg, firstDeg)))).sort().reverse()
@@ -189,11 +189,11 @@ class Calculation {
   }
 
   static errorSyndrome(firstControlByte, secondControlByte) {
-    let errorSyndrome = 
-    Convert.binaryToPolynom(this.binaryByDegrees(this.moduloAddition(
-      this.getPolynomialDegrees(Convert.binaryToPolynom(Convert.toBin(Convert.fromHexToDec(firstControlByte)))),
-      this.getPolynomialDegrees(Convert.binaryToPolynom(Convert.toBin(Convert.fromHexToDec(secondControlByte))))
-    )))
+    let errorSyndrome =
+      Convert.binaryToPolynom(this.binaryByDegrees(this.moduloAddition(
+        this.getPolynomialDegrees(Convert.binaryToPolynom(Convert.toBin(Convert.fromHexToDec(firstControlByte)))),
+        this.getPolynomialDegrees(Convert.binaryToPolynom(Convert.toBin(Convert.fromHexToDec(secondControlByte))))
+      )))
     return errorSyndrome
   }
 }

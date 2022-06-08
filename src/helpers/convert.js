@@ -3,7 +3,7 @@ class Convert {
 
   static toHexWithoutZeros(num) {
     num = num.toString(16)
-    return num
+    return num.toUpperCase()
   }
 
   static toHex(num) {

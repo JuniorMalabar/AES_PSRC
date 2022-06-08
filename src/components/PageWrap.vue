@@ -1,6 +1,7 @@
 <template>
   <div class="main-wrap">
     <Edit 
+      v-if="!inputByte"
       @select-element="selectElement"
       @input-error="inputError"
       :message="'Введите значение входного байта в шестнадцатеричной системе счисления'"
@@ -132,6 +133,8 @@
       :selectedElementRowIndex="decLeftPartOfInputByte"
       :selectedElementColIndex="decRightPartOfInputByte"
     />
+
+    
     
     <div v-if="inputByte && PSRCreplace" class="tables-wrapper">
       <div class="info-tables-wrapper">
@@ -235,6 +238,10 @@ export default {
       tableTypes: ["standart", "information", "control"],
       inputByte: null,
       hexInputByte: null,
+      leftPartOfInputByte: null,
+      rightPartOfInputByte: null,
+      newRow: null,
+      newCol: null,
       error: false,
       AESreplace: false,
       PSRCreplace: false,
@@ -250,7 +257,8 @@ export default {
 
   mounted() {
     this.standartTable = Standart.STANDART_TABLE();
-    console.log(Calculation.binaryByDegrees([]))
+    //data: Display.addHexPrefix(Calculation.getFirstControlByte(Convert.fromHexToDec(errorByte), this.$store.getters.tableDataById("S2"))), 
+    //console.log(Calculation.getFirstControlByte(Convert.fromHexToDec("0x0E"), Convert.fromHexToDec("0x09")))
   },
 
   watch: {
@@ -321,29 +329,37 @@ export default {
       if(this.erroneousBasis == "S1") {
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getFirstControlByte(Convert.fromHexToDec(errorByte), this.$store.getters.tableDataById("S2"))), 
+          data: Display.addHexPrefix(Calculation.getFirstControlByte(Convert.fromHexToDec(errorByte), Convert.fromHexToDec(this.$store.getters.tableDataById("S2")))), 
           tableId: "S1*"
         })
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getSecondControlByte(Convert.fromHexToDec(errorByte), this.$store.getters.tableDataById("S2"), this.thirdFourthDegreePolynomial)), 
+          data: Display.addHexPrefix(Calculation.getSecondControlByte(Convert.fromHexToDec(errorByte), Convert.fromHexToDec(this.$store.getters.tableDataById("S2")), this.thirdFourthDegreePolynomial)), 
           tableId: "S2*" 
         })
       } else if (this.erroneousBasis == "S2") {
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getFirstControlByte(this.$store.getters.tableDataById("S1"), errorByte)), 
+          data: Display.addHexPrefix(Calculation.getFirstControlByte(this.$store.getters.tableDataById("S1"), Convert.fromHexToDec(errorByte))), 
           tableId: "S1*"
         })
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getSecondControlByte(this.$store.getters.tableDataById("S1"), errorByte, this.thirdFourthDegreePolynomial)), 
+          data: Display.addHexPrefix(Calculation.getSecondControlByte(this.$store.getters.tableDataById("S1"), Convert.fromHexToDec(errorByte), this.thirdFourthDegreePolynomial)), 
           tableId: "S2*" 
         })
       }
-      
+      console.log("Синдром ошибки для " + this.erroneousBasis + " основания " + this.erroneousBit + " разряда")
+      console.log("Δ1", Calculation.errorSyndrome(
+        this.$store.getters.tableDataById("S1*"),
+        this.$store.getters.tableDataWithErrorById("S1*")
+      ))
+      console.log("Δ2", Calculation.errorSyndrome(
+        this.$store.getters.tableDataById("S2*"),
+        this.$store.getters.tableDataWithErrorById("S2*")
+      ))
       this.openErrorInfo = true
-        
+      
     },
 
     removeErrorToBases() {
@@ -394,6 +410,16 @@ export default {
         })
       } 
     },
+    setParams(inputByte) {
+
+      this.leftPartOfInputByte = Convert.toHex(inputByte).slice(0,1);
+      this.rightPartOfInputByte = Convert.toHex(inputByte).slice(1,2);      
+
+      let rowCol = this.leftPartOfInputByte+this.rightPartOfInputByte
+      this.newRow = Calculation.getNewRowColFromStandartRow(rowCol, this.firstFourthDegreePolynomial)
+      this.newCol = Calculation.getNewRowColFromStandartRow(rowCol, this.secondFourthDegreePolynomial)
+      this.$forceUpdate()
+    },
 
     tableValue(tableId) {
       return this.$store.getters.tableDataById(tableId);
@@ -411,10 +437,12 @@ export default {
         this.hexInputByte = null
       } else if (check == 0){
         this.inputByte = "0"
-        this.hexInputByte = "0x00" 
+        this.hexInputByte = "0x00"
+        this.setParams(this.inputByte) 
       } else {
         this.inputByte =  check;
-        this.hexInputByte = Convert.toHex(this.inputByte)
+        this.hexInputByte = Display.addHexPrefix(Convert.toHex(this.inputByte))
+        this.setParams(this.inputByte)
       }
       if (this.PSRCreplace || this.AESreplace) {
         this.showPolynom();
@@ -465,16 +493,6 @@ export default {
       }
     },
 
-    newRow() {
-      let rowCol = this.leftPartOfInputByte+this.rightPartOfInputByte
-      return Calculation.getNewRowColFromStandartRow(rowCol, this.firstFourthDegreePolynomial)
-    },
-
-    newCol() {
-      let rowCol = this.leftPartOfInputByte+this.rightPartOfInputByte
-      return Calculation.getNewRowColFromStandartRow(rowCol, this.secondFourthDegreePolynomial)
-    },
-
     firstInfoTableData() {
       return this.newTableData(this.standartTable, 'S1')
     },
@@ -499,16 +517,8 @@ export default {
       return Display.indexesToTop(Convert.binaryToPolynom(this.binaryInputByte));
     },
 
-    leftPartOfInputByte() {
-      return Convert.toHex(this.inputByte).slice(0,1);
-    },
-
     decLeftPartOfInputByte() {
       return Convert.fromHexToDec(this.leftPartOfInputByte)
-    },
-    
-    rightPartOfInputByte() {
-      return Convert.toHex(this.inputByte).slice(1,2);
     },
 
     decRightPartOfInputByte() {
@@ -631,6 +641,7 @@ export default {
   }
 
   .initial-data {
+      margin-top: 20px;
       border: 1px solid;
       margin-bottom: 20px;
       padding: 15px;
