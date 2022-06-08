@@ -70,11 +70,14 @@
         </p>
       </div>
       <p v-if="PSRCreplace">
-        <enhanced-check :label="'Внести ошибку'"
+        <enhanced-check :label="'Коррекция ошибки'"
                 v-model="addError" 
                 id="error-checkbox"/>
       </p>
       <div v-if="addError && PSRCreplace" class="choose-error-place">
+        <p>
+          Выберите основание и разряд, подвергнувшиеся искажению:
+        </p>
         <div class="choose-wrapper">
           <div class="choose-base">
             <p>
@@ -120,6 +123,17 @@
           </p>
           <p>
             Вычислим синдром ошибки Δ, сложив соответствующие значения контрольных байтов:
+          </p>
+          <p>
+            Δ<sub>1</sub> = {{ this.$store.getters.tableDataById("S1*") }} + {{ this.$store.getters.tableDataWithErrorById("S1*") }} = <span ref="first-syndrome"/>
+          </p>
+          <p>
+            Δ<sub>2</sub> = {{ this.$store.getters.tableDataById("S2*") }} + {{ this.$store.getters.tableDataWithErrorById("S2*") }} = <span ref="second-syndrome"/>
+          </p>
+          <p class="syndrome-conclusion">
+            Полученный результат свидетельствует о том, что избыточный код ПСКВ содержит ошибку.
+            Соотношение рассчитанного синдрома ошибки <span ref="result-syndrome"/> с таблицей синдромов ошибок позволяет однозначно определить искажённые основание и разряд. 
+            Данная таблицы так же хранит для каждого искажения вектор ошибки, сложение которого с искажённым основанием позволяет скорректировать ошибку. 
           </p>
         </div>
         
@@ -252,13 +266,13 @@ export default {
       secondFourthDegreePolynomial: "x4+x3+1",
       thirdFourthDegreePolynomial: "x4+x3+x2+x+1",
       openErrorInfo: false,
+      firstErrorSynrome: null,
+      secondErrorSynrome: null
     }
   },
 
   mounted() {
     this.standartTable = Standart.STANDART_TABLE();
-    //data: Display.addHexPrefix(Calculation.getFirstControlByte(Convert.fromHexToDec(errorByte), this.$store.getters.tableDataById("S2"))), 
-    //console.log(Calculation.getFirstControlByte(Convert.fromHexToDec("0x0E"), Convert.fromHexToDec("0x09")))
   },
 
   watch: {
@@ -349,17 +363,30 @@ export default {
           tableId: "S2*" 
         })
       }
-      console.log("Синдром ошибки для " + this.erroneousBasis + " основания " + this.erroneousBit + " разряда")
-      console.log("Δ1", Calculation.errorSyndrome(
-        this.$store.getters.tableDataById("S1*"),
-        this.$store.getters.tableDataWithErrorById("S1*")
-      ))
-      console.log("Δ2", Calculation.errorSyndrome(
-        this.$store.getters.tableDataById("S2*"),
-        this.$store.getters.tableDataWithErrorById("S2*")
-      ))
+
+      this.getErrorSyndrome()
       this.openErrorInfo = true
       
+    },
+
+    getErrorSyndrome() {
+      this.firstErrorSynrome = Calculation.errorSyndrome(
+        this.$store.getters.tableDataById("S1*"),
+        this.$store.getters.tableDataWithErrorById("S1*")
+      )
+
+      this.secondErrorSynrome = Calculation.errorSyndrome(
+        this.$store.getters.tableDataById("S2*"),
+        this.$store.getters.tableDataWithErrorById("S2*")
+      )
+
+      this.$nextTick(()=> {
+        this.$nextTick(()=> {
+          this.$refs["first-syndrome"].innerHTML = Display.indexesToTop(this.firstErrorSynrome);  
+          this.$refs["second-syndrome"].innerHTML = Display.indexesToTop(this.secondErrorSynrome); 
+          this.$refs["result-syndrome"].innerHTML = "(" + Display.indexesToTop(this.firstErrorSynrome) + ", " + Display.indexesToTop(this.secondErrorSynrome) + ")";  
+        })
+      })
     },
 
     removeErrorToBases() {
@@ -616,6 +643,9 @@ export default {
       }
     }
     
+  }
+  .syndrome-conclusion {
+    max-width: 675.94px;
   }
   .reset {
     text-align: end;
