@@ -130,7 +130,7 @@
           <p>
             Δ<sub>2</sub> = {{ this.$store.getters.tableDataById("S2*") }} + {{ this.$store.getters.tableDataWithErrorById("S2*") }} = <span ref="second-syndrome"/>
           </p>
-          <p class="syndrome-conclusion">
+          <p class="syndrome-conclusion" v-if="firstErrorSyndrome && secondErrorSyndrome">
             Полученный результат свидетельствует о том, что избыточный код ПСКВ содержит ошибку.
             Соотношение рассчитанного синдрома ошибки <span ref="result-syndrome"/> с таблицей синдромов ошибок позволяет однозначно определить искажённые основание и разряд. 
             Данная таблицы так же хранит для каждого искажения вектор ошибки, сложение которого с искажённым основанием позволяет скорректировать ошибку. 
@@ -266,8 +266,9 @@ export default {
       secondFourthDegreePolynomial: "x4+x3+1",
       thirdFourthDegreePolynomial: "x4+x3+x2+x+1",
       openErrorInfo: false,
-      firstErrorSynrome: null,
-      secondErrorSynrome: null
+      firstErrorSyndrome: null,
+      secondErrorSyndrome: null,
+      errorSyndrome: []
     }
   },
 
@@ -281,6 +282,9 @@ export default {
         this.erroneousBasis = ''
         this.erroneousBit = ''
         this.openErrorInfo = false
+        this.errorSyndrome = []
+        this.firstErrorSyndrome = null
+        this.secondErrorSyndrome = null
         return newVal
       },
       immediate: true
@@ -354,12 +358,12 @@ export default {
       } else if (this.erroneousBasis == "S2") {
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getFirstControlByte(this.$store.getters.tableDataById("S1"), Convert.fromHexToDec(errorByte))), 
+          data: Display.addHexPrefix(Calculation.getFirstControlByte(Convert.fromHexToDec(this.$store.getters.tableDataById("S1")), Convert.fromHexToDec(errorByte))), 
           tableId: "S1*"
         })
         this.$store.dispatch("setTableDataWithError", 
         {
-          data: Display.addHexPrefix(Calculation.getSecondControlByte(this.$store.getters.tableDataById("S1"), Convert.fromHexToDec(errorByte), this.thirdFourthDegreePolynomial)), 
+          data: Display.addHexPrefix(Calculation.getSecondControlByte(Convert.fromHexToDec(this.$store.getters.tableDataById("S1")), Convert.fromHexToDec(errorByte), this.thirdFourthDegreePolynomial)), 
           tableId: "S2*" 
         })
       }
@@ -370,21 +374,23 @@ export default {
     },
 
     getErrorSyndrome() {
-      this.firstErrorSynrome = Calculation.errorSyndrome(
+      this.firstErrorSyndrome = Calculation.errorSyndrome(
         this.$store.getters.tableDataById("S1*"),
         this.$store.getters.tableDataWithErrorById("S1*")
       )
 
-      this.secondErrorSynrome = Calculation.errorSyndrome(
+      this.secondErrorSyndrome = Calculation.errorSyndrome(
         this.$store.getters.tableDataById("S2*"),
         this.$store.getters.tableDataWithErrorById("S2*")
       )
 
+      this.errorSyndrome = [this.firstErrorSyndrome, this.secondErrorSyndrome]
+
       this.$nextTick(()=> {
         this.$nextTick(()=> {
-          this.$refs["first-syndrome"].innerHTML = Display.indexesToTop(this.firstErrorSynrome);  
-          this.$refs["second-syndrome"].innerHTML = Display.indexesToTop(this.secondErrorSynrome); 
-          this.$refs["result-syndrome"].innerHTML = "(" + Display.indexesToTop(this.firstErrorSynrome) + ", " + Display.indexesToTop(this.secondErrorSynrome) + ")";  
+          this.$refs["first-syndrome"].innerHTML = Display.indexesToTop(this.firstErrorSyndrome);  
+          this.$refs["second-syndrome"].innerHTML = Display.indexesToTop(this.secondErrorSyndrome); 
+          this.$refs["result-syndrome"].innerHTML = "(" + Display.indexesToTop(this.firstErrorSyndrome) + ", " + Display.indexesToTop(this.secondErrorSynrome) + ")";  
         })
       })
     },
@@ -392,6 +398,9 @@ export default {
     removeErrorToBases() {
       this.erroneousBasis = '';
       this.erroneousBit = '';
+      this.errorSyndrome = []
+      this.firstErrorSyndrome = null
+      this.secondErrorSyndrome = null
       this.openErrorInfo = false;
       this.$store.dispatch("resetTableDataWithError")
     },
