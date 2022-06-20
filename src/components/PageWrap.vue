@@ -274,6 +274,8 @@ export default {
 
   mounted() {
     this.standartTable = Standart.STANDART_TABLE();
+
+    console.log(Calculation.combinationRecovery('1001', '0001'))
   },
 
   watch: {
@@ -390,7 +392,7 @@ export default {
         this.$nextTick(()=> {
           this.$refs["first-syndrome"].innerHTML = Display.indexesToTop(this.firstErrorSyndrome);  
           this.$refs["second-syndrome"].innerHTML = Display.indexesToTop(this.secondErrorSyndrome); 
-          this.$refs["result-syndrome"].innerHTML = "(" + Display.indexesToTop(this.firstErrorSyndrome) + ", " + Display.indexesToTop(this.secondErrorSynrome) + ")";  
+          this.$refs["result-syndrome"].innerHTML = "(" + Display.indexesToTop(this.firstErrorSyndrome) + ", " + Display.indexesToTop(this.secondErrorSyndrome) + ")";  
         })
       })
     },

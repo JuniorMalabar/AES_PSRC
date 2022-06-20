@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Display from './display';
 import Convert from './convert';
 
 class Calculation {
@@ -195,6 +196,25 @@ class Calculation {
         this.getPolynomialDegrees(Convert.binaryToPolynom(Convert.toBin(Convert.fromHexToDec(secondControlByte))))
       )))
     return errorSyndrome
+  }
+
+  static errorVector(bit) {
+    let zeros = [...'0000']
+    zeros.splice(bit, 1, "1")
+    return zeros.reverse().join('');
+  }
+
+  static altBinaryAddition(firstBin, secondBin) {
+    return (Number(Display.addBinPrefix(firstBin)) + Number(Display.addBinPrefix(secondBin))).toString(2)
+  }
+  static combinationRecovery(erronousBinaryCombination, errorVector) {
+    let errBit = errorVector.split('').indexOf('1')
+    if (erronousBinaryCombination[errBit] == "0") {
+      erronousBinaryCombination.split('').splice(errorVector.split('').indexOf('1'), 1, '1')
+    } else {
+      erronousBinaryCombination.split('').splice(errorVector.split('').indexOf('1'), 1, '0')
+    }
+    return erronousBinaryCombination
   }
 }
 
