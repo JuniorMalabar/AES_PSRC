@@ -137,7 +137,7 @@
             <br>
             Так же данная таблица хранит соответствующий вектор ошибки - {{ errorVector }}
             <br>
-            Для коррекции ошибки сложим вектор ошибки с искаженным байтом ({{ this.$store.getters.tableDataWithErrorById(erroneousBasis) }} , {{ showErroniusByteAsBin(erroneousBasis) }})
+            Для коррекции ошибки сложим вектор ошибки с искаженным байтом ({{ this.$store.getters.tableDataWithErrorById(erroneousBasis) }} , {{ showErroniusByteAsBin(erroneousBasis, true) }})
             <br>
             {{ showErroniusByteAsBin(erroneousBasis) }} + {{ errorVector }} = {{ showRecoveredByteAsBin() }} =  {{ showRecoveredByteAsByte() }}
             <br>
@@ -401,16 +401,19 @@ export default {
       this.getErrorVector(this.erroneousBit)      
     },
 
-    showErroniusByteAsBin(errBasis) {
+    showErroniusByteAsBin(errBasis, pref=false) {
+      if(pref){
+        return Display.addBinPrefix(Convert.toBinWithoutZeros(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(errBasis))))
+      }
       return Convert.toBinWithoutZeros(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(errBasis)))
     },
 
     showRecoveredByteAsByte() {
-      return Convert.toHex(Convert.fromBinToDec(Calculation.combinationRecovery(Convert.toBin(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(this.erroneousBasis))),this.errorVector)))
+      return Display.addHexPrefix(Convert.toHex(Convert.fromBinToDec(Calculation.combinationRecovery(Convert.toBin(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(this.erroneousBasis))),this.errorVector))))
     },
 
     showRecoveredByteAsBin() {
-      return Calculation.combinationRecovery(Convert.toBin(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(this.erroneousBasis))),this.errorVector)
+      return Display.addBinPrefix(Calculation.combinationRecovery(Convert.toBinWithoutZeros(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(this.erroneousBasis))),this.errorVector))
     },
 
     openErrorInfoTable() {
