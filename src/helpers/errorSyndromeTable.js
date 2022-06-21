@@ -1,4 +1,3 @@
-//import Calculation from "./calculation";
 import Convert from "./convert";
 
 class ErrorSyndromeTable {

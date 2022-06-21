@@ -108,7 +108,6 @@ class Calculation {
         )
       )
     )
-    console.log(fromFirst)
     let fromSecond = this.getPolynomialDegrees(
       Convert.binaryToPolynom(
         Convert.toBin(
@@ -116,7 +115,6 @@ class Calculation {
         )
       )
     )
-    console.log(fromSecond)
     let hexFirstControlByte = Convert.toHex(
       Convert.fromBinToDec(
         this.binaryByDegrees(
