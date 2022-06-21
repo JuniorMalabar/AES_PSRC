@@ -6,6 +6,14 @@ class Convert {
     return num.toUpperCase()
   }
 
+  static toBinWithoutZeros(num) {
+    num = num.toString(2)
+    while (num.length < 4) {
+      num = '0' + num
+    }
+    return num;
+  }
+
   static toHex(num) {
     num = num.toString(16)
     if (num.length < 2) {

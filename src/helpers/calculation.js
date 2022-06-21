@@ -60,10 +60,11 @@ class Calculation {
     if (firstDeg == 0 && secondDeg == 0) {
       return '0'
     }
-    if (firstDeg == [] || firstDeg == 0) {
+    if ((firstDeg == [] || firstDeg == 0) && (secondDeg != [] || secondDeg != 0)) {
+
       return secondDeg
     }
-    if (secondDeg == [] || secondDeg == 0) {
+    if ((secondDeg == [] || secondDeg == 0) && (firstDeg != [] || firstDeg != 0)) {
       return firstDeg
     }
     return Array.from(new Set(_.concat(_.difference(firstDeg, secondDeg),
@@ -208,13 +209,7 @@ class Calculation {
     return (Number(Display.addBinPrefix(firstBin)) + Number(Display.addBinPrefix(secondBin))).toString(2)
   }
   static combinationRecovery(erronousBinaryCombination, errorVector) {
-    let errBit = errorVector.split('').indexOf('1')
-    if (erronousBinaryCombination[errBit] == "0") {
-      erronousBinaryCombination.split('').splice(errorVector.split('').indexOf('1'), 1, '1')
-    } else {
-      erronousBinaryCombination.split('').splice(errorVector.split('').indexOf('1'), 1, '0')
-    }
-    return erronousBinaryCombination
+    return (Number(Display.addBinPrefix(erronousBinaryCombination)) ^ Number(Display.addBinPrefix(errorVector))).toString(2)
   }
 }
 

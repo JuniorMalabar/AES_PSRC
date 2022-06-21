@@ -102,7 +102,7 @@
         </div>
         <span class="choose-res" v-if="erroneousBasis&&erroneousBit">Ошибка в {{ erroneousBasisShow }} основании, {{ erroneousBitShow }} разряде  </span>
         <div class="error-buttons-wrapper">
-          <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="addErrorToBases">Внести ошибку</button>
+          <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="openErrorInfoTable">Внести ошибку</button>
           <button  v-if="erroneousBasis&&erroneousBit" class="button error" @click="removeErrorToBases">Убрать ошибку</button>
         </div>
         
@@ -110,16 +110,16 @@
         <div v-if="erroneousBasis&&erroneousBit&&openErrorInfo">
           <p>В результате воздействия ошибки получены следующие значения:</p>
           <p>
-            Выходной байт первой информационной таблицы: <b>{{tableValueWithError('S1')}}</b>
+            <span v-if="erroneousBasis=='S1'">Искаженный в</span><span v-else>В</span>ыходной байт первой информационной таблицы: <b>{{tableValueWithError('S1')}}</b>
           </p>
           <p>
-            Выходной байт второй информационной таблицы: <b>{{tableValueWithError('S2')}}</b>
+            <span v-if="erroneousBasis=='S2'">Искаженный в</span><span v-else>В</span>ыходной байт второй информационной таблицы: <b>{{tableValueWithError('S2')}}</b>
           </p>
           <p>
-            Выходной байт первой контрольной таблицы: <b>{{tableValueWithError('S1*')}}</b>
+            <span v-if="erroneousBasis=='S1*'">Искаженный в</span><span v-else>В</span>ыходной байт первой контрольной таблицы: <b>{{tableValueWithError('S1*')}}</b>
           </p>
           <p>
-            Выходной байт второй контрольной таблицы: <b>{{tableValueWithError('S2*')}}</b>
+            <span v-if="erroneousBasis=='S2*'">Искаженный в</span><span v-else>В</span>ыходной байт второй контрольной таблицы: <b>{{tableValueWithError('S2*')}}</b>
           </p>
           <p>
             Вычислим синдром ошибки Δ, сложив соответствующие значения контрольных байтов:
@@ -132,8 +132,19 @@
           </p>
           <p class="syndrome-conclusion" v-if="firstErrorSyndrome && secondErrorSyndrome">
             Полученный результат свидетельствует о том, что избыточный код ПСКВ содержит ошибку.
-            Соотношение рассчитанного синдрома ошибки <span ref="result-syndrome"/> с таблицей синдромов ошибок позволяет однозначно определить искажённые основание и разряд. 
-            Данная таблицы так же хранит для каждого искажения вектор ошибки, сложение которого с искажённым основанием позволяет скорректировать ошибку. 
+            <br>
+            В результате соотношения рассчитанного синдрома ошибки <span ref="result-syndrome"/> с таблицей синдромов ошибок можно точно определить, что ошибка произошла в {{ erroneousBitShow }} разряде {{ erroneousBasisShow }} основания.    
+            <br>
+            Так же данная таблица хранит соответствующий вектор ошибки - {{ errorVector }}
+            <br>
+            Для коррекции ошибки сложим вектор ошибки с искаженным байтом ({{ this.$store.getters.tableDataWithErrorById(erroneousBasis) }} , {{ showErroniusByteAsBin(erroneousBasis) }})
+            <br>
+            {{ showErroniusByteAsBin(erroneousBasis) }} + {{ errorVector }} = {{ showRecoveredByteAsBin() }} =  {{ showRecoveredByteAsByte() }}
+            <br>
+            Ошибка исправлена!
+          </p>
+          <p v-if="firstErrorSyndrome && secondErrorSyndrome">
+            
           </p>
         </div>
         
@@ -268,14 +279,14 @@ export default {
       openErrorInfo: false,
       firstErrorSyndrome: null,
       secondErrorSyndrome: null,
-      errorSyndrome: []
+      errorSyndrome: [],
+      errorVector: null
     }
   },
 
   mounted() {
     this.standartTable = Standart.STANDART_TABLE();
 
-    console.log(Calculation.combinationRecovery('1001', '0001'))
   },
 
   watch: {
@@ -297,6 +308,22 @@ export default {
         return newVal
       },
       immediate: true
+    },
+    erroneousBasis: {
+      handler() {
+        if(this.erroneousBasis && this.erroneousBit && this.openErrorInfo) {
+          this.addErrorToBases()
+        }
+      },
+      immediate: false
+    },
+    erroneousBit: {
+      handler() {
+        if(this.erroneousBasis && this.erroneousBit && this.openErrorInfo) {
+          this.addErrorToBases()
+        }
+      },
+      immediate: false
     }
   },
 
@@ -371,8 +398,24 @@ export default {
       }
 
       this.getErrorSyndrome()
+      this.getErrorVector(this.erroneousBit)      
+    },
+
+    showErroniusByteAsBin(errBasis) {
+      return Convert.toBinWithoutZeros(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(errBasis)))
+    },
+
+    showRecoveredByteAsByte() {
+      return Convert.toHex(Convert.fromBinToDec(Calculation.combinationRecovery(Convert.toBin(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(this.erroneousBasis))),this.errorVector)))
+    },
+
+    showRecoveredByteAsBin() {
+      return Calculation.combinationRecovery(Convert.toBin(Convert.fromHexToDec(this.$store.getters.tableDataWithErrorById(this.erroneousBasis))),this.errorVector)
+    },
+
+    openErrorInfoTable() {
       this.openErrorInfo = true
-      
+      this.addErrorToBases()
     },
 
     getErrorSyndrome() {
@@ -502,11 +545,16 @@ export default {
     inputError(inputError){
       this.error = inputError;
       this.inputByte = null;
-    }
+    },
+
+    getErrorVector(errBit) {
+      this.errorVector =  Calculation.errorVector(errBit)
+    },
   },
 
   computed: {
     
+
     erroneousBasisShow() {
       if(this.erroneousBasis == "S1") {
         return 1
