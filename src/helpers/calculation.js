@@ -57,14 +57,14 @@ class Calculation {
   }
 
   static moduloAddition(firstDeg, secondDeg) {
-    if (firstDeg == 0 && secondDeg == 0) {
+    if (firstDeg == [] && secondDeg == []) {
       return '0'
     }
-    if ((firstDeg == [] || firstDeg == 0) && (secondDeg != [] || secondDeg != 0)) {
+    if (firstDeg == [] && secondDeg != []) {
 
       return secondDeg
     }
-    if ((secondDeg == [] || secondDeg == 0) && (firstDeg != [] || firstDeg != 0)) {
+    if (secondDeg == [] && firstDeg != []) {
       return firstDeg
     }
     return Array.from(new Set(_.concat(_.difference(firstDeg, secondDeg),
@@ -108,6 +108,7 @@ class Calculation {
         )
       )
     )
+    console.log(fromFirst)
     let fromSecond = this.getPolynomialDegrees(
       Convert.binaryToPolynom(
         Convert.toBin(
@@ -115,6 +116,7 @@ class Calculation {
         )
       )
     )
+    console.log(fromSecond)
     let hexFirstControlByte = Convert.toHex(
       Convert.fromBinToDec(
         this.binaryByDegrees(

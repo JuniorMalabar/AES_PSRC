@@ -286,7 +286,7 @@ export default {
 
   mounted() {
     this.standartTable = Standart.STANDART_TABLE();
-
+    console.log(Calculation.getFirstControlByte(Convert.fromHexToDec('0x01'),Convert.fromHexToDec('0x00')))
   },
 
   watch: {
