@@ -24,9 +24,9 @@ class Calculation {
   static remainderAfterDividingAPolynomialByAPolynomial(polynom_1, polynom_2) {
 
     if (polynom_1 == polynom_2) {
-      return [0];
+      return 404;
     }
-
+    
     let degrees_1 = this.getPolynomialDegrees(polynom_1);
     let degrees_2 = this.getPolynomialDegrees(polynom_2);
     let seniorDegree_1 = degrees_1[0];
@@ -49,6 +49,9 @@ class Calculation {
     let binary = '00000000'.split('')
     if (typeof degrees === 'string') {
       degrees = this.getPolynomialDegrees(degrees)
+    }
+    if (degrees == 404) {
+      return '00000000'
     }
     for (let i = 0; i < degrees.length; i++) {
       binary[degrees[i]] = '1'

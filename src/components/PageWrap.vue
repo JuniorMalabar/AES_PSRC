@@ -623,7 +623,10 @@ export default {
     },
 
     secondRemainder() {
+      console.log(Convert.binaryToPolynom(this.binaryInputByte))
+      console.log(this.secondFourthDegreePolynomial)
       let res = Calculation.remainderAfterDividingAPolynomialByAPolynomial(Convert.binaryToPolynom(this.binaryInputByte), this.secondFourthDegreePolynomial) 
+      console.log(res)
       return Convert.binaryToPolynom(Calculation.binaryByDegrees(res))
     },
 
